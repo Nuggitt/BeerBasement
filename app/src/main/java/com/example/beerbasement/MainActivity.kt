@@ -12,8 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.beerbasement.model.BeersViewModelState
+import com.example.beerbasement.screens.BeerList
 import com.example.beerbasement.ui.theme.BeerBasementTheme
 
 class MainActivity : ComponentActivity() {
@@ -30,20 +33,31 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen() {
+fun MainScreen(modifier: Modifier = Modifier) {
     val viewModel: BeersViewModelState = viewModel()
     val navController = rememberNavController()
+    val beers = viewModel.beersFlow.value
+    val errorMessage = viewModel.errorMessage.value
 
-    NavHost(navController = navController, startDestination = NavRoutes.List.route) {
-        composable(NavRoutes.List.route) {
-            List()
+    NavHost(navController = navController, startDestination = NavRoutes.BeerList.route) {
+        composable(NavRoutes.BeerList.route) {
+            BeerList(
+                modifier =  modifier,
+                beers = beers,
+                errorMessage = errorMessage,
+                onBeerSelected = { /* TODO */ }
 
-}
+            )
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    BeerBasementTheme {
 
+        }
     }
 }
+
+        @Preview(showBackground = true)
+        @Composable
+        fun GreetingPreview() {
+            BeerBasementTheme {
+
+            }
+        }

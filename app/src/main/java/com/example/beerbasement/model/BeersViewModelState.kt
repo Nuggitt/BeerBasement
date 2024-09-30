@@ -4,18 +4,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.beerbasement.repository.BeersRepository
+import androidx.compose.runtime.State
 
 class BeersViewModelState : ViewModel() {
-    var beers by mutableStateOf<List<Beer>>(listOf())
-        private set
+   private val  repository = BeersRepository()
+    val beersFlow: State<List<Beer>> = repository.beersFlow
+    val errorMessage : State<String> = repository.errorMessageFlow
+    val reloadingFlow: State<Boolean> = repository.isLoadingBeers
 
-    fun addBeer(beer: Beer) {
-        beers = beers + beer
+    init {
+        reload()
     }
 
-    fun removeBeer(beer: Beer) {
-        beers = beers - beer
+    fun reload() {
+        repository.getBeers()
     }
+
+
 
 
 
