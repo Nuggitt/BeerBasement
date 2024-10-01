@@ -1,5 +1,6 @@
 package com.example.beerbasement.repository
 
+import BeerBasementService
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -11,19 +12,20 @@ import retrofit2.Callback
 import retrofit2.Response
 
 
-class BeersRepository  {
+
+class BeersRepository {
     private val baseUrl = "https://anbo-restbeer.azurewebsites.net/api/"
-    private val  beerBasementService  : BeerBasementService
+    private val beerBasementService: BeerBasementService
     val beersFlow: MutableState<List<Beer>> = mutableStateOf(listOf())
-     val isLoadingBeers = mutableStateOf(false)
+    val isLoadingBeers = mutableStateOf(false)
     val errorMessageFlow = mutableStateOf("")
 
     init {
-        val retrofit = Retrofit.Builder()
+        val build : Retrofit = Retrofit.Builder()
             .baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-        beerBasementService = retrofit.create(BeerBasementService::class.java)
+        beerBasementService = build.create(BeerBasementService::class.java)
         getBeers()
     }
 
@@ -32,7 +34,8 @@ class BeersRepository  {
         beerBasementService.GetAllBeers().enqueue(object : Callback<List<Beer>> {
             override fun onResponse(call: Call<List<Beer>>, response: Response<List<Beer>>) {
                 if (response.isSuccessful) {
-                    val beerList : List<Beer>? = response.body()
+                    Log.d("APPLE", response.body().toString())
+                    val beerList: List<Beer>? = response.body()
                     beersFlow.value = beerList ?: emptyList()
                     errorMessageFlow.value = ""
                 } else {
@@ -50,5 +53,5 @@ class BeersRepository  {
             }
         })
 
-        }
     }
+}

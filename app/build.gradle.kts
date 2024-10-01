@@ -71,7 +71,7 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+    //implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
     implementation("androidx.compose.runtime:runtime-livedata:1.7.2") // observeAsState
