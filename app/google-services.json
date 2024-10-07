@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "234565726751",
+    "project_id": "beerbasementproject",
+    "storage_bucket": "beerbasementproject.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:234565726751:android:24e14288bd55892b4f1b2a",
+        "android_client_info": {
+          "package_name": "com.example.beerbasement"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_Djkkj8HaT00SnE8nc5ToHPrb9o98wZ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

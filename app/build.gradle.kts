@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -60,6 +61,9 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.constraintlayout.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -70,6 +74,9 @@ dependencies {
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("androidx.compose.material3:material3:1.0.1")
+    implementation ("androidx.compose.material:material-icons-extended:1.4.0")
+
 
     //implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
 
