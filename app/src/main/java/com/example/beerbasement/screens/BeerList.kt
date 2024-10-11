@@ -5,17 +5,21 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,6 +28,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -42,6 +47,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.beerbasement.model.Beer
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseUser
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,20 +58,26 @@ fun BeerList(
     errorMessage: String,
     modifier: Modifier = Modifier,
     onBeerSelected: (Beer) -> Unit = {},
-
-    ) {
-    //val scaffoldState = rememberScaffoldState()
-    Scaffold(modifier = modifier,
+    user: FirebaseUser? = null,
+    signOut: () -> Unit = {},
+    navigateToAuthentication: () -> Unit = {},
+) {
+    Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
-                title = { Text("Beer Basement") })
+                title = { Text("Welcome to BeerBasement") },
+                actions = {
+                    IconButton(onClick = { signOut() }) {
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Log out")
+                    }
+                }
+            )
         },
-        // TODO in landscape layout, half the button is outside the screen
-        // something relating to rememberScaffoldState?
         floatingActionButtonPosition = FabPosition.EndOverlay,
         floatingActionButton = {
             FloatingActionButton(
@@ -73,17 +87,41 @@ fun BeerList(
             ) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
             }
-        }) { innerPadding ->
-        BeerListPanel(
-            beers = beers,
-            modifier = Modifier.padding(innerPadding),
-            errorMessage = errorMessage,
-            onBeerSelected = onBeerSelected
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
+            // Check if user is null and navigate if needed
+            if (user == null) {
+                navigateToAuthentication()
+            } else {
+                // Display a welcome message if user is logged in
+                Text(
+                    "Welcome ${user.email ?: "unknown"}",
+                    modifier = Modifier.padding(16.dp) // This can be adjusted
+                )
 
+                // Optional: reduce Spacer height or remove it
+                //Spacer(modifier = Modifier.height(2.dp)) // Adjust height or remove
 
-        )
+                // Call the BeerListPanel function to display beers
+                BeerListPanel(
+                    beers = beers,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp) // Only horizontal padding for the panel
+                        .fillMaxSize(), // Ensure it takes the available space
+                    errorMessage = errorMessage,
+                    onBeerSelected = onBeerSelected
+                )
+            }
+        }
     }
 }
+
+
 
 @Composable
 private fun BeerListPanel(
@@ -119,8 +157,7 @@ private fun BeerListPanel(
                 )
             ) {
                 Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search Icon"
+                    imageVector = Icons.Default.Search, contentDescription = "Search Icon"
                 )
                 Text("Search")
             }
@@ -173,9 +210,8 @@ private fun BeerListPanel(
         ) {
             items(beers) { beer -> // Populate the items correctly
                 BeerItem(
-                    beer = beer,
-                    onBeerSelected = onBeerSelected
-                    )
+                    beer = beer, onBeerSelected = onBeerSelected
+                )
             }
         }
     }
@@ -189,30 +225,24 @@ private fun BeerItem(
     onBeerSelected: (Beer) -> Unit = {},
 
     ) {
-    Card(
-        modifier = modifier
-            .padding(4.dp)
-            .fillMaxSize(),
-        onClick = { onBeerSelected(beer) }
+    Card(modifier = modifier
+        .padding(4.dp)
+        .fillMaxSize(), onClick = { onBeerSelected(beer) }
 
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
-        )
-        {
+        ) {
             Text(
-                modifier = Modifier.padding(8.dp),
-                text = beer.name + ": " + beer.brewery.toString()
+                modifier = Modifier.padding(8.dp), text = beer.name + ": " + beer.brewery.toString()
             )
-            Icon(
-                imageVector = Icons.Filled.Delete,
+            Icon(imageVector = Icons.Filled.Delete,
                 contentDescription = "Delete Icon",
                 modifier = Modifier
                     .padding(8.dp)
-                    .clickable { /* TODO */ }
-            )
+                    .clickable { /* TODO */ })
         }
     }
 
