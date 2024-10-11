@@ -19,11 +19,16 @@ class BeersViewModelState : ViewModel() {
 
     fun reload() {
         repository.getBeers()
+
     }
 
+    fun getBeersByUsername(username: String) {
+        repository.getBeersByUsername(username)
+    }
 
-
-
+    fun clearBeers() {
+        repository.beersFlow.value = emptyList()
+    }
 
 
 }

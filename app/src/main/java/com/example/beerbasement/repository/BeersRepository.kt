@@ -11,8 +11,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-
-
 class BeersRepository {
     private val baseUrl = "https://anbo-restbeer.azurewebsites.net/api/"
     private val beerBasementService: BeerBasementService
@@ -21,7 +19,7 @@ class BeersRepository {
     val errorMessageFlow = mutableStateOf("")
 
     init {
-        val build : Retrofit = Retrofit.Builder()
+        val build: Retrofit = Retrofit.Builder()
             .baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -52,6 +50,34 @@ class BeersRepository {
                 Log.d("APPLE", message)
             }
         })
-
     }
+
+    fun getBeersByUsername(username: String) {
+        isLoadingBeers.value = true
+
+        // Call the endpoint using the username directly
+        beerBasementService.getBeersByUsername(username).enqueue(object : Callback<List<Beer>> {
+            override fun onResponse(call: Call<List<Beer>>, response: Response<List<Beer>>) {
+                isLoadingBeers.value = false // Set loading to false after response
+                if (response.isSuccessful) {
+                    val beers: List<Beer>? = response.body()
+                    beersFlow.value = beers ?: emptyList()
+                    errorMessageFlow.value = ""
+                } else {
+                    val message = "${response.code()} : ${response.message()}"
+                    errorMessageFlow.value = message
+                    Log.d("ERROR", message)
+                }
+            }
+
+            override fun onFailure(call: Call<List<Beer>>, t: Throwable) {
+                isLoadingBeers.value = false
+                val message = t.message ?: "No connection to back-end"
+                errorMessageFlow.value = message
+                Log.d("ERROR", message)
+            }
+        })
+    }
+
+
 }

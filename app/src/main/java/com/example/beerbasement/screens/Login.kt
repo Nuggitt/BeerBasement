@@ -32,6 +32,7 @@ import androidx.constraintlayout.compose.Visibility
 import com.google.firebase.auth.FirebaseUser
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.ui.unit.dp
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,12 +43,12 @@ fun Authentication(
     message: String = "",
     signIn: (email: String, password: String) -> Unit = { _, _ -> },
     register: (email: String, password: String) -> Unit = { _, _ -> },
-    navigateToBeerList: () -> Unit = {},
+    navigateToNextScreen: () -> Unit = {},
 ) {
     if (user != null) {
-        navigateToBeerList()
+        navigateToNextScreen()
     }
-    val emailStart = "test123@gmail.com" // Default email for testing
+    val emailStart = "123@123.dk" // Default email for testing
     val passwordStart = "123456" // Default password for testing
     var email by remember { mutableStateOf(emailStart) }
     var password by remember { mutableStateOf(passwordStart) }
@@ -66,75 +67,80 @@ fun Authentication(
             )
         }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
-            // TODO layout for landscape mode
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(16.dp)
+        ) {
             if (user != null) {
                 Text("Welcome ${user.email ?: "unknown"}")
             }
-        }
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            isError = emailIsError,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-        )
-        if (emailIsError) {
-            Text("Invalid email", color = MaterialTheme.colorScheme.error)
-        }
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-            isError = passwordIsError,
-            trailingIcon = {
-                IconButton(onClick = { showPassword = !showPassword }) {
-                    if (showPassword) {
-                        Icon(Icons.Filled.Visibility, contentDescription = "Hide Password")
-                    } else {
-                        Icon(Icons.Filled.VisibilityOff, contentDescription = "Show Password")
+
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                isError = emailIsError,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            )
+            if (emailIsError) {
+                Text("Invalid email", color = MaterialTheme.colorScheme.error)
+            }
+
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+                isError = passwordIsError,
+                trailingIcon = {
+                    IconButton(onClick = { showPassword = !showPassword }) {
+                        if (showPassword) {
+                            Icon(Icons.Filled.Visibility, contentDescription = "Hide Password")
+                        } else {
+                            Icon(Icons.Filled.VisibilityOff, contentDescription = "Show Password")
+                        }
                     }
                 }
+            )
+            if (passwordIsError) {
+                Text("Invalid password", color = MaterialTheme.colorScheme.error)
             }
-        )
-        if (passwordIsError) {
-            Text("Invalid password", color = MaterialTheme.colorScheme.error)
-        }
-        if (message.isNotEmpty()) {
-            Text(message, color = MaterialTheme.colorScheme.error)
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            if (message.isNotEmpty()) {
+                Text(message, color = MaterialTheme.colorScheme.error)
+            }
 
-        ) {
-            Button(onClick = {
-                register(email, password)
-            }) {
-                Text("Register")
-            }
-            Button(onClick = {
-                email = email.trim()
-                if (email.isEmpty() || !validateEmail(email)) {
-                    emailIsError = true
-                    return@Button
-                } else {
-                    emailIsError = false
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(onClick = {
+                    register(email, password)
+                }) {
+                    Text("Register")
                 }
-                password = password.trim()
-                if (password.isEmpty()) {
-                    passwordIsError = true
-                    return@Button
-                } else {
-                    passwordIsError = false
+                Button(onClick = {
+                    email = email.trim()
+                    if (email.isEmpty() || !validateEmail(email)) {
+                        emailIsError = true
+                        return@Button
+                    } else {
+                        emailIsError = false
+                    }
+                    password = password.trim()
+                    if (password.isEmpty()) {
+                        passwordIsError = true
+                        return@Button
+                    } else {
+                        passwordIsError = false
+                    }
+                    signIn(email, password)
+                }) {
+                    Text("Sign In")
                 }
-                signIn(email, password)
-            }) {
-                Text("Sign In")
             }
         }
     }
