@@ -18,6 +18,7 @@ import com.example.beerbasement.model.AuthenticationViewModel
 import com.example.beerbasement.model.Beer
 import com.example.beerbasement.model.BeersViewModelState
 import com.example.beerbasement.screens.Authentication
+import com.example.beerbasement.screens.BeerAdd
 import com.example.beerbasement.screens.BeerList
 import com.example.beerbasement.screens.BeerDetails
 import com.example.beerbasement.ui.theme.BeerBasementTheme
@@ -78,7 +79,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 },
                 navigateToAuthentication = {
                     navController.popBackStack(NavRoutes.Login.route, inclusive = false)
-                }
+                },
+                onAdd = { navController.navigate(NavRoutes.BeerAdd.route) }
             )
         }
         composable(
@@ -101,6 +103,13 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 modifier = modifier,
                 beer = beer,
                 onNavigateBack = { navController.popBackStack() })
+        }
+        composable(NavRoutes.BeerAdd.route) {
+            BeerAdd(
+                modifier = modifier,
+                onNavigateBack = { navController.popBackStack() },
+                addBeer = { beer -> viewModel.addBeer(beer) },
+            )
         }
     }
 }

@@ -2,6 +2,8 @@ import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path
 import com.example.beerbasement.model.Beer
+import retrofit2.http.Body
+import retrofit2.http.POST
 
 interface BeerBasementService {
     @GET("beers")
@@ -12,5 +14,10 @@ interface BeerBasementService {
 
     @GET("Beers/{username}")
     fun getBeersByUsername(@Path("username") username: String): Call<List<Beer>>
+
+    @POST("beers")
+    fun addBeer(@Body beer: Beer): Call<Beer>
+
+
 
 }

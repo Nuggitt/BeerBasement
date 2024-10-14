@@ -30,5 +30,9 @@ class BeersViewModelState : ViewModel() {
         repository.beersFlow.value = emptyList()
     }
 
+    fun addBeer(beer: Beer) {
+        repository.addBeer(beer)
+    }
+
 
 }

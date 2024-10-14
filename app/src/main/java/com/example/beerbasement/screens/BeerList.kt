@@ -63,7 +63,7 @@ fun BeerList(
     user: FirebaseUser? = null,
     signOut: () -> Unit = {},
     navigateToAuthentication: () -> Unit = {},
-
+    onAdd: () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -85,7 +85,7 @@ fun BeerList(
         floatingActionButton = {
             FloatingActionButton(
                 shape = CircleShape,
-                onClick = { /* TODO */ },
+                onClick = { onAdd() },
                 containerColor = MaterialTheme.colorScheme.secondary,
             ) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
@@ -107,17 +107,15 @@ fun BeerList(
                     modifier = Modifier.padding(16.dp) // This can be adjusted
                 )
 
-                // Optional: reduce Spacer height or remove it
-                //Spacer(modifier = Modifier.height(2.dp)) // Adjust height or remove
-
-                // Call the BeerListPanel function to display beers
+                // Call the BeerListPanel function to display beers, passing the user's email
                 BeerListPanel(
                     beers = beers,
                     modifier = Modifier
                         .padding(horizontal = 16.dp) // Only horizontal padding for the panel
                         .fillMaxSize(), // Ensure it takes the available space
                     errorMessage = errorMessage,
-                    onBeerSelected = onBeerSelected
+                    onBeerSelected = onBeerSelected,
+                    userEmail = user.email ?: "" // Pass the user's email for filtering
                 )
             }
         }
@@ -131,7 +129,11 @@ private fun BeerListPanel(
     modifier: Modifier = Modifier,
     errorMessage: String,
     onBeerSelected: (Beer) -> Unit = {},
+    userEmail: String // Pass the user's email to filter beers
 ) {
+    // Filter the list of beers based on the logged-in user's email
+    val filteredBeers = beers.filter { it.user == userEmail }
+
     Column(modifier = modifier) {
         if (errorMessage.isNotEmpty()) { // Show error message only if it's not empty
             Text(text = "Problem: $errorMessage", color = MaterialTheme.colorScheme.error)
@@ -141,7 +143,7 @@ private fun BeerListPanel(
         Row {
             OutlinedTextField(
                 value = beerTitle,
-                onValueChange = { beerTitle = it },
+                onValueChange = { /* Handle beer search here */ },
                 label = { Text("Search Beer Title") },
                 modifier = Modifier
                     .weight(1f)
@@ -211,7 +213,7 @@ private fun BeerListPanel(
             columns = GridCells.Fixed(columns),
             modifier = Modifier.fillMaxSize() // Ensure it takes up available space
         ) {
-            items(beers) { beer -> // Populate the items correctly
+            items(filteredBeers) { beer -> // Only show filtered beers
                 BeerItem(
                     beer = beer, onBeerSelected = onBeerSelected
                 )

@@ -79,5 +79,27 @@ class BeersRepository {
         })
     }
 
+    fun addBeer(beer: Beer) {
+        beerBasementService.addBeer(beer).enqueue(object : Callback<Beer> {
+            override fun onResponse(call: Call<Beer>, response: Response<Beer>) {
+                if (response.isSuccessful) {
+                    Log.d("APPLE", "Added beer" + response.body())
+                    getBeers()
+                } else {
+                    val message = response.code().toString() + " : " + response.message()
+                    errorMessageFlow.value = message
+                    Log.d("ERROR", message)
+                }
+            }
+
+            override fun onFailure(call: Call<Beer>, t: Throwable) {
+                val message = t.message ?: "No connection to back-end"
+                errorMessageFlow.value = message
+                Log.d("APPLE", message)
+            }
+
+        })
+    }
+
 
 }

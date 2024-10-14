@@ -19,7 +19,8 @@ import com.example.beerbasement.model.Beer
 fun BeerDetails(
     beer: Beer,
     modifier: Modifier = Modifier,
-    onNavigateBack: () -> Unit = {}
+    onNavigateBack: () -> Unit = {},
+    signOut: () -> Unit = {},
 ) {
     var title by remember { mutableStateOf(beer.name) }
     var user by remember { mutableStateOf(beer.user) }
