@@ -63,9 +63,11 @@ fun BeerAdd(
             )
         }
     ) { innerPadding ->
-        Column(modifier = modifier
-            .padding(innerPadding)
-            .padding(start = 16.dp, end = 16.dp)) {
+        Column(
+            modifier = modifier
+                .padding(innerPadding)
+                .padding(start = 16.dp, end = 16.dp)
+        ) {
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
@@ -78,7 +80,10 @@ fun BeerAdd(
                 value = style,
                 onValueChange = { style = it },
                 label = { Text("Style") })
-            OutlinedTextField(value = abv, onValueChange = { abv = it }, label = { Text("ABV") })
+            OutlinedTextField(
+                value = abv,
+                onValueChange = { abv = it },
+                label = { Text("ABV") })
             OutlinedTextField(
                 value = volume,
                 onValueChange = { volume = it },
@@ -92,7 +97,7 @@ fun BeerAdd(
                 onValueChange = { howMany = it },
                 label = { Text("How Many") })
             Column {
-                Row{
+                Row {
                     Button(onClick = onNavigateBack) {
                         Text("Back")
                     }
