@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.beerbasement.model.Beer
+import com.google.firebase.auth.FirebaseAuth
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,16 +35,18 @@ fun BeerAdd(
     modifier: Modifier = Modifier,
     onNavigateBack: () -> Unit = {},
     addBeer: (Beer) -> Unit = {},
-    signOut: () -> Unit = {},
+    signOut: () -> Unit = { FirebaseAuth.getInstance().signOut() },
 ) {
     var title by remember { mutableStateOf("") }
-    var user by remember { mutableStateOf("") }
     var brewery by remember { mutableStateOf("") }
     var style by remember { mutableStateOf("") }
     var abv by remember { mutableStateOf("") }
     var volume by remember { mutableStateOf("") }
     var pictureUrl by remember { mutableStateOf("") }
     var howMany by remember { mutableStateOf("") }
+    val firebaseAuth = FirebaseAuth.getInstance()
+    val currentUser = firebaseAuth.currentUser?.email ?: "Unknown"
+
     Scaffold(modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
@@ -57,8 +60,6 @@ fun BeerAdd(
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Log out")
                     }
                 }
-
-
             )
         }
     ) { innerPadding ->
@@ -69,7 +70,6 @@ fun BeerAdd(
                 value = title,
                 onValueChange = { title = it },
                 label = { Text("Beer Name") })
-            OutlinedTextField(value = user, onValueChange = { user = it }, label = { Text("User") })
             OutlinedTextField(
                 value = brewery,
                 onValueChange = { brewery = it },
@@ -99,7 +99,7 @@ fun BeerAdd(
                     Button(onClick = {
                         addBeer(
                             Beer(
-                                user = user,
+                                user = currentUser,
                                 brewery = brewery,
                                 name = title,
                                 style = style,
@@ -113,19 +113,8 @@ fun BeerAdd(
                     }) {
                         Text("Add Beer")
                     }
-
                 }
             }
-
-
         }
     }
-
-}
-
-@Preview(showBackground = true)
-@Composable
-fun BeerAddPreview() {
-    BeerAdd(
-    )
 }

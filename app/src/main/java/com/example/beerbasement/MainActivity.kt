@@ -23,7 +23,6 @@ import com.example.beerbasement.screens.BeerList
 import com.example.beerbasement.screens.BeerDetails
 import com.example.beerbasement.ui.theme.BeerBasementTheme
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +30,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             BeerBasementTheme {
                 MainScreen()
-
             }
         }
     }
@@ -80,7 +78,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 navigateToAuthentication = {
                     navController.popBackStack(NavRoutes.Login.route, inclusive = false)
                 },
-                onAdd = { navController.navigate(NavRoutes.BeerAdd.route) }
+                onAdd = { navController.navigate(NavRoutes.BeerAdd.route) },
+                onDelete = { beerId: Int -> viewModel.deleteBeer(beerId) }
             )
         }
         composable(
@@ -113,7 +112,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

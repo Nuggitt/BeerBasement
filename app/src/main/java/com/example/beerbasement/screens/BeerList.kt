@@ -1,6 +1,5 @@
 package com.example.beerbasement.screens
 
-
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,9 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.beerbasement.model.Beer
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseUser
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,6 +61,7 @@ fun BeerList(
     signOut: () -> Unit = {},
     navigateToAuthentication: () -> Unit = {},
     onAdd: () -> Unit = {},
+    onDelete: (Int) -> Unit = {}
 ) {
     Scaffold(
         modifier = modifier,
@@ -115,13 +113,13 @@ fun BeerList(
                         .fillMaxSize(), // Ensure it takes the available space
                     errorMessage = errorMessage,
                     onBeerSelected = onBeerSelected,
-                    userEmail = user.email ?: "" // Pass the user's email for filtering
+                    userEmail = user.email ?: "",
+                    onDelete = onDelete
                 )
             }
         }
     }
 }
-
 
 @Composable
 private fun BeerListPanel(
@@ -129,7 +127,8 @@ private fun BeerListPanel(
     modifier: Modifier = Modifier,
     errorMessage: String,
     onBeerSelected: (Beer) -> Unit = {},
-    userEmail: String // Pass the user's email to filter beers
+    userEmail: String, // Pass the user's email to filter beers
+    onDelete: (Int) -> Unit = {}
 ) {
     // Filter the list of beers based on the logged-in user's email
     val filteredBeers = beers.filter { it.user == userEmail }
@@ -215,20 +214,19 @@ private fun BeerListPanel(
         ) {
             items(filteredBeers) { beer -> // Only show filtered beers
                 BeerItem(
-                    beer = beer, onBeerSelected = onBeerSelected
+                    beer = beer, onBeerSelected = onBeerSelected, onDelete = { onDelete(beer.id) }
                 )
             }
         }
     }
 }
 
-
 @Composable
 private fun BeerItem(
     beer: Beer,
     modifier: Modifier = Modifier,
     onBeerSelected: (Beer) -> Unit = {},
-) {
+    onDelete: (Int) -> Unit = {}) {
     Card(
         modifier = modifier
             .padding(4.dp)
@@ -247,7 +245,6 @@ private fun BeerItem(
                     .wrapContentHeight(),
                 text = "${beer.id}: ${beer.brewery}: ${beer.name} \n    ABV: ${beer.abv} Volume: ${beer.volume}",
                 overflow = TextOverflow.Ellipsis,
-
             )
             Icon(
                 imageVector = Icons.Filled.Delete,
@@ -255,12 +252,11 @@ private fun BeerItem(
                 modifier = Modifier
                     .padding(8.dp)
                     .size(24.dp)
-                    .clickable { /* TODO */ }
+                    .clickable { onDelete(beer.id) }
             )
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
@@ -303,6 +299,3 @@ fun BeerListPreview() {
         )
     }
 }
-
-
-
