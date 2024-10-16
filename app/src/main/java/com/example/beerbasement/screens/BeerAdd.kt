@@ -123,3 +123,9 @@ fun BeerAdd(
         }
     }
 }
+
+@Composable
+@Preview(showBackground = true)
+fun BeerAddPreview() {
+    BeerAdd()
+}

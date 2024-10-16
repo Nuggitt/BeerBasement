@@ -1,10 +1,13 @@
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path
-import com.example.beerbasement.model.Beer
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import com.example.beerbasement.model.Beer
+
+
 
 interface BeerBasementService {
     @GET("beers")
@@ -21,6 +24,9 @@ interface BeerBasementService {
 
     @DELETE("beers/{id}")
     fun deleteBeer(@Path("id") beerId: Int): Call<Beer>
+
+    @PUT("beers/{id}")
+    fun updateBeer(@Path("id") beerId: Int, @Body beer: Beer): Call<Beer>
 
 
 

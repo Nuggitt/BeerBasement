@@ -101,7 +101,15 @@ fun MainScreen(modifier: Modifier = Modifier) {
             BeerDetails(
                 modifier = modifier,
                 beer = beer,
-                onNavigateBack = { navController.popBackStack() })
+                onNavigateBack = { navController.popBackStack() },
+                signOut = {
+                    authenticationViewModel.signOut()
+                    viewModel.clearBeers() // Clear beers on sign out
+                },
+                onUpdate = { beerid: Int, updatedBeer: Beer -> viewModel.updateBeer(beerid, updatedBeer) }
+
+
+            )
         }
         composable(NavRoutes.BeerAdd.route) {
             BeerAdd(
