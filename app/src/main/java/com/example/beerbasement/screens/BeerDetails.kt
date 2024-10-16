@@ -24,6 +24,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.unit.dp
 import com.example.beerbasement.model.Beer
+import com.google.firebase.auth.FirebaseUser
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,7 +34,9 @@ fun BeerDetails(
     modifier: Modifier = Modifier,
     onNavigateBack: () -> Unit = {},
     signOut: () -> Unit = {},
-    onUpdate: (Int, Beer) -> Unit = { beerId: Int, updatedBeer: Beer -> }
+    onUpdate: (Int, Beer) -> Unit = { beerId: Int, updatedBeer: Beer -> },
+    user: FirebaseUser? = null,
+    navigateToAuthentication: () -> Unit = {},
 ) {
     var title by remember { mutableStateOf(beer.name) }
     var brewery by remember { mutableStateOf(beer.brewery) }
@@ -42,23 +46,8 @@ fun BeerDetails(
     var pictureUrl by remember { mutableStateOf(beer.pictureUrl) }
     var howMany by remember { mutableStateOf(beer.howMany.toString()) }
 
-    fun updateBeer() {
-        val updatedBeer = Beer(
-            id = beer.id,
-            user = beer.user,
-            brewery = brewery,
-            name = title,
-            style = style,
-            abv = abv.toFloatOrNull() ?: 0f,
-            volume = volume.toFloatOrNull() ?: 0f,
-            pictureUrl = pictureUrl,
-            howMany = howMany.toIntOrNull() ?: 0
-        )
-
-        onUpdate(beer.id, updatedBeer)
-    }
-
-    Scaffold(modifier = modifier.fillMaxSize(),
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -67,7 +56,10 @@ fun BeerDetails(
                 ),
                 title = { Text("Beer Details") },
                 actions = {
-                    IconButton(onClick = { signOut() }) {
+                    IconButton(onClick = {
+                        signOut()
+                        navigateToAuthentication()
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Log out")
                     }
                 }
@@ -80,74 +72,85 @@ fun BeerDetails(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            if (user == null) {
+                navigateToAuthentication()
+            }
+
+            // Informational Text
+            Text(
+                text = "You can update the fields below:",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
             OutlinedTextField(
                 value = title,
                 onValueChange = {
                     title = it
-                    updateBeer() // Call updateBeer whenever title changes
+                    onUpdate(beer.id, beer.copy(name = it)) // Update using onUpdate
                 },
                 label = { Text("Beer Name") },
-                modifier = Modifier.fillMaxWidth() // Fill max width for the OutlinedTextField
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = brewery,
                 onValueChange = {
                     brewery = it
-                    updateBeer() // Call updateBeer whenever brewery changes
+                    onUpdate(beer.id, beer.copy(brewery = it)) // Update using onUpdate
                 },
                 label = { Text("Brewery") },
-                modifier = Modifier.fillMaxWidth() // Fill max width for the OutlinedTextField
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = style,
                 onValueChange = {
                     style = it
-                    updateBeer() // Call updateBeer whenever style changes
+                    onUpdate(beer.id, beer.copy(style = it)) // Update using onUpdate
                 },
                 label = { Text("Style") },
-                modifier = Modifier.fillMaxWidth() // Fill max width for the OutlinedTextField
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = abv,
                 onValueChange = {
                     abv = it
-                    updateBeer() // Call updateBeer whenever abv changes
+                    onUpdate(beer.id, beer.copy(abv = it.toFloatOrNull() ?: 0f)) // Update using onUpdate
                 },
                 label = { Text("ABV") },
-                modifier = Modifier.fillMaxWidth() // Fill max width for the OutlinedTextField
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = volume,
                 onValueChange = {
                     volume = it
-                    updateBeer() // Call updateBeer whenever volume changes
+                    onUpdate(beer.id, beer.copy(volume = it.toFloatOrNull() ?: 0f)) // Update using onUpdate
                 },
                 label = { Text("Volume") },
-                modifier = Modifier.fillMaxWidth() // Fill max width for the OutlinedTextField
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = pictureUrl,
                 onValueChange = {
                     pictureUrl = it
-                    updateBeer() // Call updateBeer whenever picture URL changes
+                    onUpdate(beer.id, beer.copy(pictureUrl = it)) // Update using onUpdate
                 },
                 label = { Text("Picture URL") },
-                modifier = Modifier.fillMaxWidth() // Fill max width for the OutlinedTextField
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = howMany,
                 onValueChange = {
                     howMany = it
-                    updateBeer() // Call updateBeer whenever how many changes
+                    onUpdate(beer.id, beer.copy(howMany = it.toIntOrNull() ?: 0)) // Update using onUpdate
                 },
                 label = { Text("How Many") },
-                modifier = Modifier.fillMaxWidth() // Fill max width for the OutlinedTextField
+                modifier = Modifier.fillMaxWidth()
             )
 
             // Optional Back Button
@@ -157,3 +160,5 @@ fun BeerDetails(
         }
     }
 }
+
+

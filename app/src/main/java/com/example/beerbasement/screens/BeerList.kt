@@ -71,13 +71,14 @@ fun BeerList(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
-                title = { Text("Welcome to BeerBasement") },
+                title = { Text("Welcome to BeerBasement ${user?.email ?: "Guest"}") },
                 actions = {
                     IconButton(onClick = { signOut() }) {
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Log out")
                     }
                 }
             )
+
         },
         floatingActionButtonPosition = FabPosition.EndOverlay,
         floatingActionButton = {
@@ -99,11 +100,7 @@ fun BeerList(
             if (user == null) {
                 navigateToAuthentication()
             } else {
-                // Display a welcome message if user is logged in
-                Text(
-                    "Welcome ${user.email ?: "unknown"}",
-                    modifier = Modifier.padding(16.dp) // This can be adjusted
-                )
+
 
                 // Call the BeerListPanel function to display beers, passing the user's email
                 BeerListPanel(
@@ -146,14 +143,14 @@ private fun BeerListPanel(
                 label = { Text("Search Beer Title") },
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = 6.dp),
+                    .padding(start = 6.dp, top = 10.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             )
             Button(
                 onClick = {
                     // Implement search logic here
                 },
-                modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 10.dp),
+                modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 20.dp),
                 shape = MaterialTheme.shapes.extraSmall,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
