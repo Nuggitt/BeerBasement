@@ -73,15 +73,15 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation ("androidx.compose.material3:material3:1.0.1")
-    implementation ("androidx.compose.material:material-icons-extended:1.4.0")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation ("androidx.compose.material3:material3:1.3.0")
+    implementation ("androidx.compose.material:material-icons-extended:1.7.4")
 
 
     //implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
-    implementation("androidx.compose.runtime:runtime-livedata:1.7.2") // observeAsState
+    implementation("androidx.compose.runtime:runtime-livedata:1.7.4") // observeAsState
 
 }
