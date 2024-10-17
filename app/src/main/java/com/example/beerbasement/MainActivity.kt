@@ -79,7 +79,12 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     navController.popBackStack(NavRoutes.Login.route, inclusive = false)
                 },
                 onAdd = { navController.navigate(NavRoutes.BeerAdd.route) },
-                onDelete = { beerId: Int -> viewModel.deleteBeer(beerId) }
+                onDelete = { beerId: Int -> viewModel.deleteBeer(beerId) },
+                sortByBrewery = { viewModel.sortBeersByBrewery(ascending = it) },
+                sortByName = { viewModel.sortBeersByName(ascending = it) },
+                sortByABV = { viewModel.sortBeersByABV(ascending = it) },
+                sortByVolume = { viewModel.sortBeersByVolume(ascending = it) },
+                filterByTitle = { viewModel.filterByTitle(it) }
             )
         }
         composable(

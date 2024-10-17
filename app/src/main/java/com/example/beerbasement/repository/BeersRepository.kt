@@ -144,6 +144,49 @@ class BeersRepository {
         })
     }
 
+    fun sortBeersByBrewery(ascending: Boolean) {
+        if(ascending) {
+            beersFlow.value = beersFlow.value.sortedBy { it.brewery }
+        } else {
+            beersFlow.value = beersFlow.value.sortedByDescending { it.brewery }
+        }
+    }
+
+    fun sortBeersByName(ascending: Boolean) {
+        if(ascending) {
+            beersFlow.value = beersFlow.value.sortedBy { it.name }
+        } else {
+            beersFlow.value = beersFlow.value.sortedByDescending { it.name }
+        }
+    }
+
+    fun sortBeersByABV(ascending: Boolean) {
+        if(ascending) {
+            beersFlow.value = beersFlow.value.sortedBy { it.abv }
+        } else {
+            beersFlow.value = beersFlow.value.sortedByDescending { it.abv }
+        }
+    }
+
+    fun sortBeersByVolume(ascending: Boolean) {
+        if(ascending) {
+            beersFlow.value = beersFlow.value.sortedBy { it.volume }
+        } else {
+            beersFlow.value = beersFlow.value.sortedByDescending { it.volume }
+        }
+    }
+
+    fun filterByTitle(titleFragment: String) {
+        if (titleFragment.isEmpty()) {
+            getBeers()
+            return
+        }
+        beersFlow.value =
+            beersFlow.value.filter {
+                it.name.contains(titleFragment, ignoreCase = true)
+            }
+    }
+
 
 
 }

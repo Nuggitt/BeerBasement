@@ -61,7 +61,12 @@ fun BeerList(
     signOut: () -> Unit = {},
     navigateToAuthentication: () -> Unit = {},
     onAdd: () -> Unit = {},
-    onDelete: (Int) -> Unit = {}
+    onDelete: (Int) -> Unit = {},
+    sortByBrewery: (up: Boolean) -> Unit = {},
+    sortByName: (up: Boolean) -> Unit = {},
+    sortByABV: (up: Boolean) -> Unit = {},
+    sortByVolume: (up: Boolean) -> Unit = {},
+    filterByTitle: (title: String) -> Unit = {}
 ) {
     Scaffold(
         modifier = modifier,
@@ -111,7 +116,12 @@ fun BeerList(
                     errorMessage = errorMessage,
                     onBeerSelected = onBeerSelected,
                     userEmail = user.email ?: "",
-                    onDelete = onDelete
+                    onDelete = onDelete,
+                    sortByBrewery = sortByBrewery,
+                    sortByName = sortByName,
+                    sortByABV = sortByABV,
+                    sortByVolume = sortByVolume,
+                    filterByTitle = filterByTitle
                 )
             }
         }
@@ -125,21 +135,30 @@ private fun BeerListPanel(
     errorMessage: String,
     onBeerSelected: (Beer) -> Unit = {},
     userEmail: String, // Pass the user's email to filter beers
-    onDelete: (Int) -> Unit = {}
+    onDelete: (Int) -> Unit = {},
+    sortByBrewery: (up: Boolean) -> Unit = {},
+    sortByName: (up: Boolean) -> Unit = {},
+    sortByABV: (up: Boolean) -> Unit = {},
+    sortByVolume: (up: Boolean) -> Unit = {},
+    filterByTitle: (title: String) -> Unit = {}
+
 ) {
     // Filter the list of beers based on the logged-in user's email
     val filteredBeers = beers.filter { it.user == userEmail }
+    var sortBreweryAscending by remember { mutableStateOf(true) }
+    var sortNameAscending by remember { mutableStateOf(true) }
+    var sortABVAscending by remember { mutableStateOf(true) }
+    var sortVolumeAscending by remember { mutableStateOf(true) }
+    var titleFragment by remember { mutableStateOf("") }
 
     Column(modifier = modifier) {
         if (errorMessage.isNotEmpty()) { // Show error message only if it's not empty
             Text(text = "Problem: $errorMessage", color = MaterialTheme.colorScheme.error)
         }
-
-        var beerTitle by remember { mutableStateOf("") }
         Row {
             OutlinedTextField(
-                value = beerTitle,
-                onValueChange = { /* Handle beer search here */ },
+                value = titleFragment,
+                onValueChange = { titleFragment = it },
                 label = { Text("Search Beer Title") },
                 modifier = Modifier
                     .weight(1f)
@@ -148,7 +167,7 @@ private fun BeerListPanel(
             )
             Button(
                 onClick = {
-                    // Implement search logic here
+                    filterByTitle(titleFragment)
                 },
                 modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 20.dp),
                 shape = MaterialTheme.shapes.extraSmall,
@@ -169,38 +188,71 @@ private fun BeerListPanel(
                 .fillMaxWidth()
                 .padding(vertical = 10.dp)
         ) {
-            Text(
-                text = "Sort By Name",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
+            Button(
+                onClick = {
+                    sortBreweryAscending = !sortBreweryAscending
+                    sortByBrewery(sortBreweryAscending)
+                },
                 modifier = Modifier
                     .weight(1f)
-                    .padding(8.dp)
-            )
-            Text(
-                text = "Name",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
+                    .padding(8.dp),
+                shape = MaterialTheme.shapes.extraSmall,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                )
+            ) {
+                Text(text = "Sort by Brewery")
+            }
+            Button(
+                onClick = {
+                    sortNameAscending = !sortNameAscending
+                    sortByName(sortNameAscending)
+                },
                 modifier = Modifier
                     .weight(1f)
-                    .padding(8.dp)
-            )
-            Text(
-                text = "Volume",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
+                    .padding(8.dp),
+                shape = MaterialTheme.shapes.extraSmall,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                )
+            ) {
+                Text(text = "Sort by Name")
+            }
+            Button(
+                onClick = {
+                    sortABVAscending = !sortABVAscending
+                    sortByABV(sortABVAscending)
+                },
                 modifier = Modifier
                     .weight(1f)
-                    .padding(8.dp)
-            )
-            Text(
-                text = "ABV",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
+                    .padding(8.dp),
+                shape = MaterialTheme.shapes.extraSmall,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                )
+            ) {
+                Text(text = "Sort by ABV")
+            }
+
+            Button(
+                onClick = {
+                    sortVolumeAscending = !sortVolumeAscending
+                    sortByVolume(sortVolumeAscending)
+                },
                 modifier = Modifier
                     .weight(1f)
-                    .padding(8.dp)
-            )
+                    .padding(8.dp),
+                shape = MaterialTheme.shapes.extraSmall,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                )
+            ) {
+                Text(text = "Sort by Volume")
+            }
         }
 
         val orientation = LocalConfiguration.current.orientation

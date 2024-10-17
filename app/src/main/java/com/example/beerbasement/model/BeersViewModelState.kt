@@ -9,7 +9,7 @@ import androidx.compose.runtime.State
 
 class BeersViewModelState : ViewModel() {
    private val  repository = BeersRepository()
-    val beersFlow: State<List<Beer>> = repository.beersFlow
+    var beersFlow: State<List<Beer>> = repository.beersFlow
     val errorMessage : State<String> = repository.errorMessageFlow
     val reloadingFlow: State<Boolean> = repository.isLoadingBeers
 
@@ -41,6 +41,27 @@ class BeersViewModelState : ViewModel() {
     fun updateBeer(beerId: Int, beer: Beer) {
         repository.updateBeer(beerId, beer)
     }
+
+    fun sortBeersByBrewery(ascending: Boolean) {
+        repository.sortBeersByBrewery(ascending)
+    }
+
+    fun sortBeersByName(ascending: Boolean) {
+        repository.sortBeersByName(ascending)
+    }
+
+    fun sortBeersByABV(ascending: Boolean) {
+        repository.sortBeersByABV(ascending)
+    }
+
+    fun sortBeersByVolume(ascending: Boolean) {
+        repository.sortBeersByVolume(ascending)
+    }
+
+    fun filterByTitle(title: String) {
+        repository.filterByTitle(title)
+    }
+
 
 
 
