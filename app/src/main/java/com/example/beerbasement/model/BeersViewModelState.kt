@@ -1,5 +1,6 @@
 package com.example.beerbasement.model
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -61,6 +62,10 @@ class BeersViewModelState : ViewModel() {
     fun filterByTitle(title: String) {
         repository.filterByTitle(title)
     }
+
+
+
+
 
 
 

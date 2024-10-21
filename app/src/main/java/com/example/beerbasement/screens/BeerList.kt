@@ -1,6 +1,7 @@
 package com.example.beerbasement.screens
 
 import android.content.res.Configuration
+import android.provider.ContactsContract.CommonDataKinds.Website
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,15 +17,25 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.TrendingFlat
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.NoDrinks
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.EmojiFoodBeverage
+import androidx.compose.material.icons.outlined.LocalDrink
+import androidx.compose.material.icons.outlined.NoDrinks
+import androidx.compose.material.icons.sharp.AccountBox
+import androidx.compose.material.icons.sharp.NoDrinks
+import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -67,7 +78,8 @@ fun BeerList(
     sortByName: (up: Boolean) -> Unit = {},
     sortByABV: (up: Boolean) -> Unit = {},
     sortByVolume: (up: Boolean) -> Unit = {},
-    filterByTitle: (title: String) -> Unit = {}
+    filterByTitle: (title: String) -> Unit = {},
+
 ) {
     Scaffold(
         modifier = modifier,
@@ -77,21 +89,32 @@ fun BeerList(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
-                title = { Text("Welcome to BeerBasement ${user?.email ?: "Guest"}") },
+                title = {
+                    Text("Welcome to BeerBasement ${user?.email ?: "Guest"}",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                        },
                 actions = {
                     IconButton(onClick = { signOut() }) {
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Log out")
                     }
+
                 }
+
             )
+
+
 
         },
         floatingActionButtonPosition = FabPosition.EndOverlay,
         floatingActionButton = {
             FloatingActionButton(
-                shape = CircleShape,
+                shape = MaterialTheme.shapes.medium,
                 onClick = { onAdd() },
                 containerColor = MaterialTheme.colorScheme.secondary,
+
             ) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
             }
@@ -184,7 +207,7 @@ private fun BeerListPanel(
                 modifier = Modifier
                     .weight(1f)
                     .padding(8.dp),
-                shape = MaterialTheme.shapes.extraSmall,
+                shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -207,7 +230,7 @@ private fun BeerListPanel(
                 modifier = Modifier
                     .weight(1f)
                     .padding(8.dp),
-                shape = MaterialTheme.shapes.extraSmall,
+                shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -229,17 +252,18 @@ private fun BeerListPanel(
                 modifier = Modifier
                     .weight(1f)
                     .padding(8.dp),
-                shape = MaterialTheme.shapes.extraSmall,
+                shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
+
                 )
             ) {
                 Text(text = "Sort by ABV")
                 Icon(
                     imageVector = if (sortABVAscending) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                     contentDescription = if (sortABVAscending) "Sort Ascending" else "Sort Descending",
-                    modifier = Modifier.size(24.dp).padding(start = 4.dp)
+                    modifier = Modifier.size(24.dp).padding(start = 4.dp),
                 )
             }
 
@@ -251,7 +275,7 @@ private fun BeerListPanel(
                 modifier = Modifier
                     .weight(1f)
                     .padding(8.dp),
-                shape = MaterialTheme.shapes.extraSmall,
+                shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -292,7 +316,11 @@ private fun BeerItem(
         modifier = modifier
             .padding(4.dp)
             .fillMaxWidth(),
-        onClick = { onBeerSelected(beer) }
+        shape = MaterialTheme.shapes.medium,
+        onClick = { onBeerSelected(beer) },
+        colors = CardDefaults.cardColors(
+            MaterialTheme.colorScheme.primaryContainer,
+        )
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -306,6 +334,8 @@ private fun BeerItem(
                     .wrapContentHeight(),
                 text = "${beer.id}: ${beer.brewery}: ${beer.name} \n    ABV: ${beer.abv} Volume: ${beer.volume}",
                 overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary
             )
             Icon(
                 imageVector = Icons.Filled.Delete,
@@ -313,7 +343,10 @@ private fun BeerItem(
                 modifier = Modifier
                     .padding(8.dp)
                     .size(24.dp)
-                    .clickable { onDelete(beer.id) }
+                    .clickable { onDelete(beer.id) },
+                tint = MaterialTheme.colorScheme.primary
+
+
             )
         }
     }

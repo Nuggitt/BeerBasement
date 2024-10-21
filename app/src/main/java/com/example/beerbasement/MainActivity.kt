@@ -84,7 +84,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 sortByName = { viewModel.sortBeersByName(ascending = it) },
                 sortByABV = { viewModel.sortBeersByABV(ascending = it) },
                 sortByVolume = { viewModel.sortBeersByVolume(ascending = it) },
-                filterByTitle = { viewModel.filterByTitle(it) }
+                filterByTitle = { viewModel.filterByTitle(it) },
+
             )
         }
         composable(
@@ -112,8 +113,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     viewModel.clearBeers() // Clear beers on sign out
                 },
                 onUpdate = { beerid: Int, updatedBeer: Beer -> viewModel.updateBeer(beerid, updatedBeer) }
-
-
             )
         }
         composable(NavRoutes.BeerAdd.route) {
@@ -125,6 +124,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
         }
     }
 }
+
+
 
 @Preview(showBackground = true)
 @Composable

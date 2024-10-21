@@ -1,6 +1,9 @@
 package com.example.beerbasement.repository
 
 import BeerBasementService
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -200,4 +203,6 @@ class BeersRepository {
         // Return the filtered list
         return filteredBeers
     }
+
+
 }
