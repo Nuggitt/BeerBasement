@@ -18,6 +18,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -42,7 +44,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -158,29 +159,16 @@ private fun BeerListPanel(
         Row {
             OutlinedTextField(
                 value = titleFragment,
-                onValueChange = { titleFragment = it },
-                label = { Text("Search Beer Title") },
+                onValueChange = {
+                    titleFragment = it
+                    filterByTitle(it)
+                },
+                label = { Text("Search Beer Name Or Brewery") },
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 6.dp, top = 10.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             )
-            Button(
-                onClick = {
-                    filterByTitle(titleFragment)
-                },
-                modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 20.dp),
-                shape = MaterialTheme.shapes.extraSmall,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Search, contentDescription = "Search Icon"
-                )
-                Text("Search")
-            }
         }
 
         Row(
@@ -203,7 +191,14 @@ private fun BeerListPanel(
                 )
             ) {
                 Text(text = "Sort by Brewery")
+                Icon(
+                    imageVector = if (sortBreweryAscending) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                    contentDescription = if (sortBreweryAscending) "Sort Ascending" else "Sort Descending",
+                    modifier = Modifier.size(24.dp).padding(start = 4.dp) // Add some padding for spacing
+                )
             }
+
+            // Repeat for other sorting buttons
             Button(
                 onClick = {
                     sortNameAscending = !sortNameAscending
@@ -219,7 +214,13 @@ private fun BeerListPanel(
                 )
             ) {
                 Text(text = "Sort by Name")
+                Icon(
+                    imageVector = if (sortNameAscending) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                    contentDescription = if (sortNameAscending) "Sort Ascending" else "Sort Descending",
+                    modifier = Modifier.size(24.dp).padding(start = 4.dp)
+                )
             }
+
             Button(
                 onClick = {
                     sortABVAscending = !sortABVAscending
@@ -235,6 +236,11 @@ private fun BeerListPanel(
                 )
             ) {
                 Text(text = "Sort by ABV")
+                Icon(
+                    imageVector = if (sortABVAscending) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                    contentDescription = if (sortABVAscending) "Sort Ascending" else "Sort Descending",
+                    modifier = Modifier.size(24.dp).padding(start = 4.dp)
+                )
             }
 
             Button(
@@ -252,6 +258,11 @@ private fun BeerListPanel(
                 )
             ) {
                 Text(text = "Sort by Volume")
+                Icon(
+                    imageVector = if (sortVolumeAscending) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                    contentDescription = if (sortVolumeAscending) "Sort Ascending" else "Sort Descending",
+                    modifier = Modifier.size(24.dp).padding(start = 4.dp)
+                )
             }
         }
 
@@ -275,7 +286,8 @@ private fun BeerItem(
     beer: Beer,
     modifier: Modifier = Modifier,
     onBeerSelected: (Beer) -> Unit = {},
-    onDelete: (Int) -> Unit = {}) {
+    onDelete: (Int) -> Unit = {}
+) {
     Card(
         modifier = modifier
             .padding(4.dp)
