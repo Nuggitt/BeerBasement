@@ -181,11 +181,13 @@ class BeersRepository {
             getBeers()
             return
         }
-        beersFlow.value =
-            beersFlow.value.filter {
-                it.name.contains(titleFragment, ignoreCase = true)
-            }
+
+        beersFlow.value = beersFlow.value.filter {
+            it.name.contains(titleFragment, ignoreCase = true) ||
+                    it.brewery.contains(titleFragment, ignoreCase = true)
+        }
     }
+
 
 
 

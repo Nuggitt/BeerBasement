@@ -32,6 +32,7 @@ import androidx.constraintlayout.compose.Visibility
 import com.google.firebase.auth.FirebaseUser
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.unit.dp
 
 
@@ -45,9 +46,12 @@ fun Authentication(
     register: (email: String, password: String) -> Unit = { _, _ -> },
     navigateToNextScreen: () -> Unit = {},
 ) {
-    if (user != null) {
-        navigateToNextScreen()
+    LaunchedEffect(user) {
+        if (user != null) {
+            navigateToNextScreen()
+        }
     }
+
     val emailStart = "123@123.dk" // Default email for testing
     val passwordStart = "123456" // Default password for testing
     var email by remember { mutableStateOf(emailStart) }
