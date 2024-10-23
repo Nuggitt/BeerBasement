@@ -5,9 +5,12 @@ import android.provider.ContactsContract.CommonDataKinds.Website
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -17,21 +20,11 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.automirrored.filled.TrendingFlat
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.NoDrinks
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.EmojiFoodBeverage
-import androidx.compose.material.icons.outlined.LocalDrink
-import androidx.compose.material.icons.outlined.NoDrinks
-import androidx.compose.material.icons.sharp.AccountBox
-import androidx.compose.material.icons.sharp.NoDrinks
-import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -48,17 +41,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.beerbasement.model.Beer
 import com.google.firebase.auth.FirebaseUser
 
@@ -80,31 +76,36 @@ fun BeerList(
     sortByVolume: (up: Boolean) -> Unit = {},
     filterByTitle: (title: String) -> Unit = {},
 
-) {
+    ) {
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.secondary,
                 ),
                 title = {
-                    Text("Welcome to BeerBasement ${user?.email ?: "Guest"}",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.primary
+                    Text(
+                        "Welcome to BeerBasement ${user?.email ?: "Guest"}",
+                        modifier = Modifier.padding(4.dp),
+                        fontSize = 14.sp
                     )
 
-                        },
+                },
                 actions = {
                     IconButton(onClick = { signOut() }) {
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Log out")
                     }
 
-                }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max =  85.dp)
+                    .padding()
+
 
             )
-
 
 
         },
@@ -115,7 +116,7 @@ fun BeerList(
                 onClick = { onAdd() },
                 containerColor = MaterialTheme.colorScheme.secondary,
 
-            ) {
+                ) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
             }
         }
@@ -145,7 +146,7 @@ fun BeerList(
                     sortByName = sortByName,
                     sortByABV = sortByABV,
                     sortByVolume = sortByVolume,
-                    filterByTitle = filterByTitle
+                    filterByTitle = filterByTitle,
                 )
             }
         }
@@ -166,6 +167,7 @@ private fun BeerListPanel(
     sortByVolume: (up: Boolean) -> Unit = {},
     filterByTitle: (title: String) -> Unit = {}
 
+
 ) {
     // Filter the list of beers based on the logged-in user's email
     val filteredBeers = beers.filter { it.user == userEmail }
@@ -174,6 +176,7 @@ private fun BeerListPanel(
     var sortABVAscending by remember { mutableStateOf(true) }
     var sortVolumeAscending by remember { mutableStateOf(true) }
     var titleFragment by remember { mutableStateOf("") }
+    val orientation = LocalConfiguration.current.orientation
 
     Column(modifier = modifier) {
         if (errorMessage.isNotEmpty()) { // Show error message only if it's not empty
@@ -188,10 +191,21 @@ private fun BeerListPanel(
                 },
                 label = { Text("Search Beer Name Or Brewery") },
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 6.dp, top = 10.dp),
+                    .weight(1f),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             )
+        }
+
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Modifier
+                .weight(1f)
+                .padding(8.dp)
+                .height(48.dp) // Set a specific height for portrait
+        } else {
+            Modifier
+                .weight(1f)
+                .padding(8.dp)
+                .height(56.dp) // Set a different height for landscape
         }
 
         Row(
@@ -211,17 +225,23 @@ private fun BeerListPanel(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
-                )
+                ),
+                contentPadding = PaddingValues(12.dp)
             ) {
-                Text(text = "Sort by Brewery")
+                Text(
+                    text = "Sort by Brewery",
+                    style = MaterialTheme.typography.labelSmall
+                )
                 Icon(
                     imageVector = if (sortBreweryAscending) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                     contentDescription = if (sortBreweryAscending) "Sort Ascending" else "Sort Descending",
-                    modifier = Modifier.size(24.dp).padding(start = 4.dp) // Add some padding for spacing
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(start = 4.dp)
                 )
+
             }
 
-            // Repeat for other sorting buttons
             Button(
                 onClick = {
                     sortNameAscending = !sortNameAscending
@@ -234,13 +254,19 @@ private fun BeerListPanel(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
-                )
+                ),
+                contentPadding = PaddingValues(12.dp)
             ) {
-                Text(text = "Sort by Name")
+                Text(
+                    text = "Sort by Name",
+                    style = MaterialTheme.typography.labelSmall
+                )
                 Icon(
                     imageVector = if (sortNameAscending) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                     contentDescription = if (sortNameAscending) "Sort Ascending" else "Sort Descending",
-                    modifier = Modifier.size(24.dp).padding(start = 4.dp)
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(start = 4.dp)
                 )
             }
 
@@ -256,14 +282,19 @@ private fun BeerListPanel(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
-
-                )
+                ),
+                contentPadding = PaddingValues(12.dp)
             ) {
-                Text(text = "Sort by ABV")
+                Text(
+                    text = "Sort by ABV",
+                    style = MaterialTheme.typography.labelSmall
+                )
                 Icon(
                     imageVector = if (sortABVAscending) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                     contentDescription = if (sortABVAscending) "Sort Ascending" else "Sort Descending",
-                    modifier = Modifier.size(24.dp).padding(start = 4.dp),
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(start = 4.dp),
                 )
             }
 
@@ -279,18 +310,25 @@ private fun BeerListPanel(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
-                )
+                ),
+                contentPadding = PaddingValues(12.dp)
+
             ) {
-                Text(text = "Sort by Volume")
+                Text(
+                    text = "Sort by Volume",
+                    style = MaterialTheme.typography.labelSmall
+                )
                 Icon(
                     imageVector = if (sortVolumeAscending) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                     contentDescription = if (sortVolumeAscending) "Sort Ascending" else "Sort Descending",
-                    modifier = Modifier.size(24.dp).padding(start = 4.dp)
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(start = 4.dp)
                 )
             }
         }
 
-        val orientation = LocalConfiguration.current.orientation
+
         val columns = if (orientation == Configuration.ORIENTATION_PORTRAIT) 1 else 2
         LazyVerticalGrid(
             columns = GridCells.Fixed(columns),

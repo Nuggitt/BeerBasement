@@ -1,13 +1,18 @@
 package com.example.beerbasement
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -66,7 +71,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 }
             }
             BeerList(
-                modifier = modifier,
+                modifier = modifier
+                    .fillMaxSize(),
                 beers = beers,
                 errorMessage = errorMessage,
                 onBeerSelected = { beer -> navController.navigate(NavRoutes.BeerDetails.route + "/${beer.id}") },
@@ -86,7 +92,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 sortByVolume = { viewModel.sortBeersByVolume(ascending = it) },
                 filterByTitle = { viewModel.filterByTitle(it) },
 
-            )
+                )
         }
         composable(
             NavRoutes.BeerDetails.route + "/{beerId}",
@@ -112,7 +118,13 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     authenticationViewModel.signOut()
                     viewModel.clearBeers() // Clear beers on sign out
                 },
-                onUpdate = { beerid: Int, updatedBeer: Beer -> viewModel.updateBeer(beerid, updatedBeer) }
+                onUpdate = { beerid: Int, updatedBeer: Beer ->
+                    viewModel.updateBeer(
+                        beerid,
+                        updatedBeer
+                    )
+                }
+
             )
         }
         composable(NavRoutes.BeerAdd.route) {
@@ -124,7 +136,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
         }
     }
 }
-
 
 
 @Preview(showBackground = true)

@@ -13,6 +13,7 @@ googleGmsGoogleServices = "4.4.2"
 firebaseAuth = "23.0.0"
 constraintlayoutCompose = "1.0.1"
 firebaseCommonKtx = "21.0.0"
+composeMaterial = "1.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -33,6 +34,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 androidx-constraintlayout-compose = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 firebase-common-ktx = { group = "com.google.firebase", name = "firebase-common-ktx", version.ref = "firebaseCommonKtx" }
+androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
 
 [plugins]
 android-application = { id = "com.android.application", version = "8.7.1" }
