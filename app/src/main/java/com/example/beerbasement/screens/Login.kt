@@ -33,6 +33,7 @@ import com.google.firebase.auth.FirebaseUser
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.unit.dp
 
 
@@ -54,11 +55,11 @@ fun Authentication(
 
     val emailStart = "123@123.dk" // Default email for testing
     val passwordStart = "123456" // Default password for testing
-    var email by remember { mutableStateOf(emailStart) }
-    var password by remember { mutableStateOf(passwordStart) }
-    var emailIsError by remember { mutableStateOf(false) }
-    var passwordIsError by remember { mutableStateOf(false) }
-    var showPassword by remember { mutableStateOf(false) }
+    var email by rememberSaveable { mutableStateOf(emailStart) }
+    var password by rememberSaveable { mutableStateOf(passwordStart) }
+    var emailIsError by rememberSaveable { mutableStateOf(false) }
+    var passwordIsError by rememberSaveable { mutableStateOf(false) }
+    var showPassword by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         topBar = {

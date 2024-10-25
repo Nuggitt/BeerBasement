@@ -2,11 +2,13 @@ package com.example.beerbasement.screens
 
 import android.content.res.Configuration
 import android.provider.ContactsContract.CommonDataKinds.Website
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,16 +47,22 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+
+import com.example.beerbasement.R
 import com.example.beerbasement.model.Beer
 import com.google.firebase.auth.FirebaseUser
 
@@ -75,7 +83,6 @@ fun BeerList(
     sortByABV: (up: Boolean) -> Unit = {},
     sortByVolume: (up: Boolean) -> Unit = {},
     filterByTitle: (title: String) -> Unit = {},
-
     ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -175,7 +182,7 @@ private fun BeerListPanel(
     var sortNameAscending by remember { mutableStateOf(true) }
     var sortABVAscending by remember { mutableStateOf(true) }
     var sortVolumeAscending by remember { mutableStateOf(true) }
-    var titleFragment by remember { mutableStateOf("") }
+    var titleFragment by remember{ mutableStateOf("") }
     val orientation = LocalConfiguration.current.orientation
 
     Column(modifier = modifier) {
@@ -372,8 +379,20 @@ private fun BeerItem(
                     .wrapContentHeight(),
                 text = "${beer.id}: ${beer.brewery}: ${beer.name} \n    ABV: ${beer.abv} Volume: ${beer.volume}",
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+
+
+            )
+            AsyncImage(
+                model = beer.pictureUrl,
+                contentDescription = "Beer Image",
+                modifier = Modifier
+                    .size(64.dp)
+                    .padding(8.dp)
+                    .aspectRatio(1f)
+                    .clip(MaterialTheme.shapes.medium),
+
             )
             Icon(
                 imageVector = Icons.Filled.Delete,

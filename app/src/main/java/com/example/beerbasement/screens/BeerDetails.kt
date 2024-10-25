@@ -33,6 +33,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -56,13 +57,13 @@ fun BeerDetails(
     user: FirebaseUser? = null,
     navigateToAuthentication: () -> Unit = {},
 ) {
-    var title by remember { mutableStateOf(beer.name) }
-    var brewery by remember { mutableStateOf(beer.brewery) }
-    var style by remember { mutableStateOf(beer.style) }
-    var abv by remember { mutableStateOf(beer.abv.toString()) }
-    var volume by remember { mutableStateOf(beer.volume.toString()) }
-    var pictureUrl by remember { mutableStateOf(beer.pictureUrl) }
-    var howMany by remember { mutableStateOf(beer.howMany.toString()) }
+    var title by rememberSaveable { mutableStateOf(beer.name) }
+    var brewery by rememberSaveable { mutableStateOf(beer.brewery) }
+    var style by rememberSaveable { mutableStateOf(beer.style) }
+    var abv by rememberSaveable { mutableStateOf(beer.abv.toString()) }
+    var volume by rememberSaveable { mutableStateOf(beer.volume.toString()) }
+    var pictureUrl by rememberSaveable { mutableStateOf(beer.pictureUrl) }
+    var howMany by rememberSaveable { mutableStateOf(beer.howMany.toString()) }
 
     val swipeableState = rememberSwipeableState(0)
     val sizePx = with(LocalDensity.current) { 300.dp.toPx() }

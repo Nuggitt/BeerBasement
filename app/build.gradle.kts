@@ -80,7 +80,7 @@ dependencies {
     implementation ("androidx.compose.material:material-icons-extended:1.7.4")
 
 
-
+    implementation("io.coil-kt:coil-compose:2.7.0")
 
 
     //implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
