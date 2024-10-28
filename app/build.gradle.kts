@@ -81,6 +81,8 @@ dependencies {
 
 
     implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation ("org.mockito:mockito-core:4.0.0")
+    implementation ("org.mockito:mockito-inline:4.0.0")
 
 
     //implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
