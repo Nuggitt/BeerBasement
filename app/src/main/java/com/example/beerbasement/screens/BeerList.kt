@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Liquor
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -61,10 +62,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 
 import com.example.beerbasement.R
 import com.example.beerbasement.model.Beer
+import com.example.beerbasement.model.BeersViewModelState
 import com.google.firebase.auth.FirebaseUser
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,7 +87,8 @@ fun BeerList(
     sortByABV: (up: Boolean) -> Unit = {},
     sortByVolume: (up: Boolean) -> Unit = {},
     filterByTitle: (title: String) -> Unit = {},
-    ) {
+    navigateToUrlSite: (String) -> Unit = {},
+) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -102,14 +106,25 @@ fun BeerList(
 
                 },
                 actions = {
+                    IconButton(
+                        onClick = {
+                            navigateToUrlSite("https://untappd.com/")
+                        },
+
+                        ) {
+                        Icon(Icons.Filled.Liquor, contentDescription = "BeerBasement")
+                    }
+
                     IconButton(onClick = { signOut() }) {
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Log out")
+
                     }
+
 
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max =  85.dp)
+                    .heightIn(max = 85.dp)
                     .padding()
 
 
@@ -183,7 +198,7 @@ private fun BeerListPanel(
     var sortNameAscending by remember { mutableStateOf(true) }
     var sortABVAscending by remember { mutableStateOf(true) }
     var sortVolumeAscending by remember { mutableStateOf(true) }
-    var titleFragment by remember{ mutableStateOf("") }
+    var titleFragment by remember { mutableStateOf("") }
     val orientation = LocalConfiguration.current.orientation
 
     Column(modifier = modifier) {
@@ -385,7 +400,7 @@ private fun BeerItem(
                 color = MaterialTheme.colorScheme.primary,
 
 
-            )
+                )
             AsyncImage(
                 model = beer.pictureUrl,
                 contentDescription = "Beer Image",
@@ -395,7 +410,7 @@ private fun BeerItem(
                     .aspectRatio(1f)
                     .clip(MaterialTheme.shapes.medium),
 
-            )
+                )
             Icon(
                 imageVector = Icons.Filled.Delete,
                 contentDescription = "Delete Icon",

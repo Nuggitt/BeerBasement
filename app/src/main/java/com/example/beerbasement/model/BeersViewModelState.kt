@@ -63,6 +63,10 @@ class BeersViewModelState : ViewModel() {
         repository.filterByTitle(title)
     }
 
+    fun navigateToUrlSite(context: Context, url: String) {
+        repository.NavigateToUrlSite(context, url)
+    }
+
 
 
 

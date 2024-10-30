@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -48,6 +49,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
     val beers = viewModel.beersFlow.value
     val errorMessage = viewModel.errorMessage.value
     val user = authenticationViewModel.user
+    val context = LocalContext.current
 
     NavHost(navController = navController, startDestination = NavRoutes.Login.route) {
         composable(NavRoutes.Login.route) {
@@ -91,8 +93,10 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 sortByABV = { viewModel.sortBeersByABV(ascending = it) },
                 sortByVolume = { viewModel.sortBeersByVolume(ascending = it) },
                 filterByTitle = { viewModel.filterByTitle(it) },
+                navigateToUrlSite = { url -> viewModel.navigateToUrlSite(context, url) }
 
-                )
+
+            )
         }
         composable(
             NavRoutes.BeerDetails.route + "/{beerId}",

@@ -204,5 +204,11 @@ class BeersRepository {
         return filteredBeers
     }
 
+    fun NavigateToUrlSite(context: Context, url: String) {
+        val uri = Uri.parse(url)
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        context.startActivity(intent)
+    }
+
 
 }
