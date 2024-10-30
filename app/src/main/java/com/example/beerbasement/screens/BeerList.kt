@@ -54,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -198,7 +199,8 @@ private fun BeerListPanel(
                 },
                 label = { Text("Search Beer Name Or Brewery") },
                 modifier = Modifier
-                    .weight(1f),
+                    .weight(1f)
+                    .testTag("SearchBeerNameOrBrewery"),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             )
         }

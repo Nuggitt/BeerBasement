@@ -53,8 +53,8 @@ fun Authentication(
         }
     }
 
-    val emailStart = "123@123.dk" // Default email for testing
-    val passwordStart = "123456" // Default password for testing
+    val emailStart = "" // Default email for testing
+    val passwordStart = "" // Default password for testing
     var email by rememberSaveable { mutableStateOf(emailStart) }
     var password by rememberSaveable { mutableStateOf(passwordStart) }
     var emailIsError by rememberSaveable { mutableStateOf(false) }

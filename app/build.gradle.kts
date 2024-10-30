@@ -84,6 +84,13 @@ dependencies {
     implementation ("org.mockito:mockito-core:4.0.0")
     implementation ("org.mockito:mockito-inline:4.0.0")
 
+    androidTestImplementation ("androidx.compose.ui:ui-test-junit4:<version>")
+    androidTestImplementation ("androidx.compose.ui:ui-test-manifest:<version>")
+
+    androidTestImplementation ("androidx.compose.ui:ui-test-junit4:<compose_version>")
+    debugImplementation ("androidx.compose.ui:ui-test-manifest:<compose_version>")
+
+
 
     //implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
 
