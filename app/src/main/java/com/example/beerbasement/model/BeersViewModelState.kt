@@ -12,7 +12,6 @@ class BeersViewModelState : ViewModel() {
    private val  repository = BeersRepository()
     var beersFlow: State<List<Beer>> = repository.beersFlow
     val errorMessage : State<String> = repository.errorMessageFlow
-    val reloadingFlow: State<Boolean> = repository.isLoadingBeers
 
     init {
         reload()
