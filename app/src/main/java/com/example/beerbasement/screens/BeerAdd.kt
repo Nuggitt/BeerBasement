@@ -1,5 +1,4 @@
 package com.example.beerbasement.screens
-
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -77,13 +76,34 @@ fun BeerAdd(
                     .padding(innerPadding)
                     .padding(start = 16.dp, end = 16.dp)
             ) {
-                OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Beer Name") })
-                OutlinedTextField(value = brewery, onValueChange = { brewery = it }, label = { Text("Brewery") })
-                OutlinedTextField(value = style, onValueChange = { style = it }, label = { Text("Style") })
-                OutlinedTextField(value = abv, onValueChange = { abv = it }, label = { Text("ABV") })
-                OutlinedTextField(value = volume, onValueChange = { volume = it }, label = { Text("Volume") })
-                OutlinedTextField(value = pictureUrl, onValueChange = { pictureUrl = it }, label = { Text("Picture URL") })
-                OutlinedTextField(value = howMany, onValueChange = { howMany = it }, label = { Text("How Many") })
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Beer Name") })
+                OutlinedTextField(
+                    value = brewery,
+                    onValueChange = { brewery = it },
+                    label = { Text("Brewery") })
+                OutlinedTextField(
+                    value = style,
+                    onValueChange = { style = it },
+                    label = { Text("Style") })
+                OutlinedTextField(
+                    value = abv,
+                    onValueChange = { abv = it },
+                    label = { Text("ABV") })
+                OutlinedTextField(
+                    value = volume,
+                    onValueChange = { volume = it },
+                    label = { Text("Volume") })
+                OutlinedTextField(
+                    value = pictureUrl,
+                    onValueChange = { pictureUrl = it },
+                    label = { Text("Picture URL") })
+                OutlinedTextField(
+                    value = howMany,
+                    onValueChange = { howMany = it },
+                    label = { Text("How Many") })
 
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Button(onClick = onNavigateBack, modifier = Modifier.weight(1f)) {
@@ -113,18 +133,57 @@ fun BeerAdd(
             }
         } else {
             // Landscape Mode
-            Box(modifier = modifier.fillMaxSize().padding(innerPadding)) {
+            Box(modifier = modifier
+                .fillMaxSize()
+                .padding(innerPadding)) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
-                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 ) {
-                    item { OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Beer Name") }) }
-                    item { OutlinedTextField(value = brewery, onValueChange = { brewery = it }, label = { Text("Brewery") }) }
-                    item { OutlinedTextField(value = style, onValueChange = { style = it }, label = { Text("Style") }) }
-                    item { OutlinedTextField(value = abv, onValueChange = { abv = it }, label = { Text("ABV") }) }
-                    item { OutlinedTextField(value = volume, onValueChange = { volume = it }, label = { Text("Volume") }) }
-                    item { OutlinedTextField(value = pictureUrl, onValueChange = { pictureUrl = it }, label = { Text("Picture URL") }) }
-                    item { OutlinedTextField(value = howMany, onValueChange = { howMany = it }, label = { Text("How Many") }) }
+                    item {
+                        OutlinedTextField(
+                            value = title,
+                            onValueChange = { title = it },
+                            label = { Text("Beer Name") })
+                    }
+                    item {
+                        OutlinedTextField(
+                            value = brewery,
+                            onValueChange = { brewery = it },
+                            label = { Text("Brewery") })
+                    }
+                    item {
+                        OutlinedTextField(
+                            value = style,
+                            onValueChange = { style = it },
+                            label = { Text("Style") })
+                    }
+                    item {
+                        OutlinedTextField(
+                            value = abv,
+                            onValueChange = { abv = it },
+                            label = { Text("ABV") })
+                    }
+                    item {
+                        OutlinedTextField(
+                            value = volume,
+                            onValueChange = { volume = it },
+                            label = { Text("Volume") })
+                    }
+                    item {
+                        OutlinedTextField(
+                            value = pictureUrl,
+                            onValueChange = { pictureUrl = it },
+                            label = { Text("Picture URL") })
+                    }
+                    item {
+                        OutlinedTextField(
+                            value = howMany,
+                            onValueChange = { howMany = it },
+                            label = { Text("How Many") })
+                    }
                     item {
                         Row {
                             Button(onClick = onNavigateBack, modifier = Modifier.weight(1f)) {
@@ -160,14 +219,18 @@ fun BeerAdd(
 
 @Preview(showBackground = true, name = "BeerAdd Preview")
 @Composable
-fun PreviewBeerAdd() {
+fun BeerAddPreview() {
     BeerBasementTheme {
         BeerAdd(
+            modifier = Modifier,
             onNavigateBack = {},
             addBeer = {},
             signOut = {}
         )
     }
 }
+
+
+
 
 
