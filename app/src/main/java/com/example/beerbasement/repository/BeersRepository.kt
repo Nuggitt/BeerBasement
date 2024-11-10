@@ -39,7 +39,7 @@ class BeersRepository {
         beerBasementService.GetAllBeers().enqueue(object : Callback<List<Beer>> {
             override fun onResponse(call: Call<List<Beer>>, response: Response<List<Beer>>) {
                 if (response.isSuccessful) {
-                    Log.d("APPLE", response.body().toString())
+                    Log.d("Get Beers virker", response.body().toString())
                     val beerList: List<Beer>? = response.body()
                     originalBeerList = beerList ?: emptyList() // Save the original list
                     beersFlow.value = originalBeerList // Set the flow to the original list
@@ -47,7 +47,7 @@ class BeersRepository {
                 } else {
                     val message = response.code().toString() + " : " + response.message()
                     errorMessageFlow.value = message
-                    Log.d("FEJLFEJLFEJL", message)
+                    Log.d("Get beers fejler", message)
                 }
             }
 
@@ -55,7 +55,7 @@ class BeersRepository {
                 isLoadingBeers.value = false
                 val message = t.message ?: "No connection to back-end"
                 errorMessageFlow.value = message
-                Log.d("APPLE", message)
+                Log.d("Ingen forbindelse til rest server", message)
             }
         })
     }
@@ -75,7 +75,7 @@ class BeersRepository {
                 } else {
                     val message = "${response.code()} : ${response.message()}"
                     errorMessageFlow.value = message
-                    Log.d("ERROR", message)
+                    Log.d("Fejl på getBeersByUserName", message)
                 }
             }
 
@@ -83,7 +83,7 @@ class BeersRepository {
                 isLoadingBeers.value = false
                 val message = t.message ?: "No connection to back-end"
                 errorMessageFlow.value = message
-                Log.d("ERROR", message)
+                Log.d("Ingen forbindelse til rest serveren", message)
             }
         })
     }
@@ -92,19 +92,19 @@ class BeersRepository {
         beerBasementService.addBeer(beer).enqueue(object : Callback<Beer> {
             override fun onResponse(call: Call<Beer>, response: Response<Beer>) {
                 if (response.isSuccessful) {
-                    Log.d("APPLE", "Added beer" + response.body())
+                    Log.d("Add beer works", "Added beer" + response.body())
                     getBeers()
                 } else {
                     val message = response.code().toString() + " : " + response.message()
                     errorMessageFlow.value = message
-                    Log.d("ERROR", message)
+                    Log.d("Add beer fails", message)
                 }
             }
 
             override fun onFailure(call: Call<Beer>, t: Throwable) {
                 val message = t.message ?: "No connection to back-end"
                 errorMessageFlow.value = message
-                Log.d("APPLE", message)
+                Log.d("Ingen mulighed for at adde til rest server", message)
             }
         })
     }
@@ -113,19 +113,19 @@ class BeersRepository {
         beerBasementService.deleteBeer(beerId).enqueue(object : Callback<Beer> {
             override fun onResponse(call: Call<Beer>, response: Response<Beer>) {
                 if (response.isSuccessful) {
-                    Log.d("APPLE", "Deleted beer")
+                    Log.d("Sletning fuldendt", "Deleted beer")
                     getBeers()
                 } else {
                     val message = response.code().toString() + " : " + response.message()
                     errorMessageFlow.value = message
-                    Log.d("ERROR", message)
+                    Log.d("sletning fejlet", message)
                 }
             }
 
             override fun onFailure(call: Call<Beer>, t: Throwable) {
                 val message = t.message ?: "No connection to back-end"
                 errorMessageFlow.value = message
-                Log.d("APPLE", message)
+                Log.d("ingen forbindelse til rest server", message)
             }
         })
     }
@@ -135,19 +135,19 @@ class BeersRepository {
         beerBasementService.updateBeer(beerId, beer).enqueue(object : Callback<Beer> {
             override fun onResponse(call: Call<Beer>, response: Response<Beer>) {
                 if (response.isSuccessful) {
-                    Log.d("APPLE", "Updated beer")
+                    Log.d("update succesfuld", "Updated beer")
                     getBeers() // Fetch updated list of beers
                 } else {
                     val message = "${response.code()} : ${response.message()}"
                     errorMessageFlow.value = message
-                    Log.d("ERROR", message)
+                    Log.d("uddate fejler", message)
                 }
             }
 
             override fun onFailure(call: Call<Beer>, t: Throwable) {
                 val message = t.message ?: "No connection to back-end"
                 errorMessageFlow.value = message
-                Log.d("APPLE", message)
+                Log.d("Ingen fobindelse til rest api", message)
             }
         })
     }
@@ -185,13 +185,12 @@ class BeersRepository {
     }
 
     fun filterByTitle(titleFragment: String): List<Beer> {
-        // If the search string is empty, refresh the beer list and return all beers
         if (titleFragment.isEmpty()) {
-            getBeersByUsername(currentUser ?: "") // Use safe call in case currentUser is null
-            return beersFlow.value // Return the current list of beers
+            getBeersByUsername(currentUser ?: "")
+            return beersFlow.value
         }
 
-        // Create a new filtered list based on both name and brewery using the original list
+
         val filteredBeers = originalBeerList.filter {
             it.name.contains(titleFragment, ignoreCase = true) ||
                     it.brewery.contains(titleFragment, ignoreCase = true)

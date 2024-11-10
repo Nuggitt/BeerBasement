@@ -37,7 +37,7 @@ firebase-common-ktx = { group = "com.google.firebase", name = "firebase-common-k
 androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
 
 [plugins]
-android-application = { id = "com.android.application", version = "8.7.1" }
+android-application = { id = "com.android.application", version = "8.7.2" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 

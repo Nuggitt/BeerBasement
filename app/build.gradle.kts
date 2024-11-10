@@ -51,7 +51,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -74,27 +73,26 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    // Retrofit & Gson
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-    implementation ("androidx.compose.material3:material3:1.3.0")
-    implementation ("androidx.compose.material:material-icons-extended:1.7.4")
 
+    // Jetpack Compose Material 3
+    implementation("androidx.compose.material3:material3:1.3.1")
+    implementation("androidx.compose.material:material-icons-extended:1.7.5")
 
+    // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.7.0")
-    implementation ("org.mockito:mockito-core:4.0.0")
-    implementation ("org.mockito:mockito-inline:4.0.0")
 
-    androidTestImplementation ("androidx.compose.ui:ui-test-junit4:<version>")
-    androidTestImplementation ("androidx.compose.ui:ui-test-manifest:<version>")
+    // Mockito for testing
+    implementation("org.mockito:mockito-core:4.0.0")
+    implementation("org.mockito:mockito-inline:4.0.0")
 
-    androidTestImplementation ("androidx.compose.ui:ui-test-junit4:<compose_version>")
-    debugImplementation ("androidx.compose.ui:ui-test-manifest:<compose_version>")
+    // Lifecycle and Compose Integration
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("androidx.compose.runtime:runtime-livedata:1.7.5") // observeAsState
 
-
-
-    //implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
-
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
-    implementation("androidx.compose.runtime:runtime-livedata:1.7.4") // observeAsState
-
+    // Test dependencies
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")  // Replace with actual version
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")  // Replace with actual version
 }

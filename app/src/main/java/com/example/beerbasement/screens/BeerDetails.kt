@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.BikeScooter
+import androidx.compose.material.icons.filled.Liquor
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Button
@@ -36,6 +37,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
@@ -56,6 +58,7 @@ fun BeerDetails(
     onUpdate: (Int, Beer) -> Unit = { beerId: Int, updatedBeer: Beer -> },
     user: FirebaseUser? = null,
     navigateToAuthentication: () -> Unit = {},
+    navigateToUrlSite: (String) -> Unit = {},
 ) {
     var title by rememberSaveable { mutableStateOf(beer.name) }
     var brewery by rememberSaveable { mutableStateOf(beer.brewery) }
@@ -129,12 +132,22 @@ fun BeerDetails(
                     )
                 },
                 actions = {
+                    IconButton(
+                        onClick = {
+                            navigateToUrlSite("https://untappd.com/")
+                        },
+
+                        ) {
+                        Icon(Icons.Filled.Liquor, contentDescription = "BeerBasement")
+                    }
+
                     IconButton(onClick = {
                         signOut()
                         navigateToAuthentication()
                     }) {
                         Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Log out")
                     }
+
                 }
             )
         }
@@ -395,6 +408,33 @@ fun UpdateFieldsGrid(
             Text("Back")
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BeerDetailsPreview() {
+    // Define a sample Beer object for the preview
+    val sampleBeer = Beer(
+        id = 1,
+        user = "Sample User",
+        name = "Sample Beer",
+        brewery = "Sample Brewery",
+        style = "IPA",
+        abv = 5.5f,
+        volume = 500f,
+        pictureUrl = "https://example.com/sample.png",
+        howMany = 3
+    )
+
+    BeerDetails(
+        beer = sampleBeer,
+        onNavigateBack = { /* Preview placeholder */ },
+        signOut = { /* Preview placeholder */ },
+        onUpdate = { _, _ -> /* Preview placeholder */ },
+        user = null, // Substitute with null or a mock FirebaseUser if needed
+        navigateToAuthentication = { /* Preview placeholder */ },
+        navigateToUrlSite = { /* Preview placeholder */ }
+    )
 }
 
 

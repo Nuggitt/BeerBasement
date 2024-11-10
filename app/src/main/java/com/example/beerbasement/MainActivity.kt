@@ -127,7 +127,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
                         beerid,
                         updatedBeer
                     )
-                }
+                },
+                navigateToUrlSite = { url -> viewModel.navigateToUrlSite(context, url) }
 
             )
         }

@@ -149,18 +149,18 @@ fun BeerList(
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            // Check if user is null and navigate if needed
+
             if (user == null) {
                 navigateToAuthentication()
             } else {
 
 
-                // Call the BeerListPanel function to display beers, passing the user's email
+
                 BeerListPanel(
                     beers = beers,
                     modifier = Modifier
-                        .padding(horizontal = 16.dp) // Only horizontal padding for the panel
-                        .fillMaxSize(), // Ensure it takes the available space
+                        .padding(horizontal = 16.dp)
+                        .fillMaxSize(),
                     errorMessage = errorMessage,
                     onBeerSelected = onBeerSelected,
                     userEmail = user.email ?: "",
@@ -194,16 +194,16 @@ private fun BeerListPanel(
 ) {
     // Filter the list of beers based on the logged-in user's email
     val filteredBeers = beers.filter { it.user == userEmail }
-    var sortBreweryAscending by remember { mutableStateOf(true) }
-    var sortNameAscending by remember { mutableStateOf(true) }
-    var sortABVAscending by remember { mutableStateOf(true) }
-    var sortVolumeAscending by remember { mutableStateOf(true) }
-    var titleFragment by remember { mutableStateOf("") }
+    var sortBreweryAscending by rememberSaveable { mutableStateOf(true) }
+    var sortNameAscending by rememberSaveable { mutableStateOf(true) }
+    var sortABVAscending by rememberSaveable { mutableStateOf(true) }
+    var sortVolumeAscending by rememberSaveable { mutableStateOf(true) }
+    var titleFragment by rememberSaveable { mutableStateOf("") }
     val orientation = LocalConfiguration.current.orientation
 
     Column(modifier = modifier) {
         if (errorMessage.isNotEmpty()) { // Show error message only if it's not empty
-            Text(text = "Problem: $errorMessage", color = MaterialTheme.colorScheme.error)
+            Text(text = "FEJL din øl liste er tom: $errorMessage", color = MaterialTheme.colorScheme.error)
         }
         Row {
             OutlinedTextField(
@@ -426,44 +426,69 @@ private fun BeerItem(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "BeerList Preview")
 @Composable
-fun BeerListPreview() {
-    MaterialTheme {
-        BeerList(
-            beers = listOf(
-                Beer(
-                    user = "User 1",
-                    brewery = "Brewery 1",
-                    name = "Beer 1",
-                    style = "Style 1",
-                    abv = 5.0f,
-                    volume = 500f,
-                    pictureUrl = "http://example.com/beer1.png",
-                    howMany = 10
-                ),
-                Beer(
-                    user = "User 2",
-                    brewery = "Brewery 2",
-                    name = "Beer 2",
-                    style = "Style 2",
-                    abv = 4.5f,
-                    volume = 330f,
-                    pictureUrl = "http://example.com/beer2.png",
-                    howMany = 5
-                ),
-                Beer(
-                    user = "User 3",
-                    brewery = "Brewery 3",
-                    name = "Beer 3",
-                    style = "Style 3",
-                    abv = 6.0f,
-                    volume = 750f,
-                    pictureUrl = "http://example.com/beer3.png",
-                    howMany = 8
-                )
-            ),
-            errorMessage = "No errors",
-        )
-    }
+fun PreviewBeerList() {
+    val sampleBeers = listOf(
+        Beer(id = 1, user = "test@example.com",  name = "Sample Beer 1", brewery = "Sample Brewery 1",  style = "some beer", abv = 5.0f, volume = 500f, pictureUrl = "https://example.com/image.jpg", howMany = 1),
+        Beer(id = 2,  user = "test@example.com", name = "Sample Beer 2", brewery = "Sample Brewery 2", style = "some beer", abv = 6.5f, volume = 330f, pictureUrl = "https://example.com/image.jpg", howMany = 1),
+    )
+    BeerList(
+        beers = sampleBeers,
+        errorMessage = "",
+        user = null,  // Assume guest user for preview
+        signOut = {},
+        navigateToAuthentication = {},
+        onAdd = {},
+        onDelete = {},
+        sortByBrewery = {},
+        sortByName = {},
+        sortByABV = {},
+        sortByVolume = {},
+        filterByTitle = {},
+        navigateToUrlSite = {}
+    )
+}
+
+@Preview(showBackground = true, name = "BeerListPanel Preview")
+@Composable
+fun PreviewBeerListPanel() {
+    val sampleBeers = listOf(
+        Beer(id = 1,  user = "test@example.com", name = "Sample Beer 1", brewery = "Sample Brewery 1", style = "Some beer", abv =  5.0f, volume = 500f, pictureUrl = "https://example.com/image.jpg", howMany = 1),
+        Beer(id = 2, user  = "test@example.com", name = "Sample Beer 2", brewery = "Sample Brewery 2", style = "some beer", abv =  6.5f, volume = 330f, pictureUrl = "https://example.com/image.jpg", howMany = 1),
+    )
+    BeerListPanel(
+        beers = sampleBeers,
+        errorMessage = "",
+        onBeerSelected = {},
+        userEmail = "test@example.com",
+        onDelete = {},
+        sortByBrewery = {},
+        sortByName = {},
+        sortByABV = {},
+        sortByVolume = {},
+        filterByTitle = {}
+    )
+}
+
+@Preview(showBackground = true, name = "BeerItem Preview")
+@Composable
+fun PreviewBeerItem() {
+    val sampleBeer = Beer(
+        id = 1,
+        user = "test@example.com",
+        name = "Sample Beer",
+        brewery = "Sample Brewery",
+        style = "Some beer",
+        abv = 5.0f,
+        volume = 500f,
+        pictureUrl = "https://example",
+        howMany = 1
+
+    )
+    BeerItem(
+        beer = sampleBeer,
+        onBeerSelected = {},
+        onDelete = {}
+    )
 }
