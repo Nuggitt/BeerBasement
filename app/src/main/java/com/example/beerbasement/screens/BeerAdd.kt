@@ -40,6 +40,7 @@ fun BeerAdd(
     onNavigateBack: () -> Unit = {},
     addBeer: (Beer) -> Unit = {},
     signOut: () -> Unit = { FirebaseAuth.getInstance().signOut() },
+    navigateToImageLabelingScreen: (String) -> Unit = {}
 ) {
     var title by rememberSaveable { mutableStateOf("") }
     var brewery by rememberSaveable { mutableStateOf("") }
@@ -51,6 +52,7 @@ fun BeerAdd(
     val firebaseAuth = FirebaseAuth.getInstance()
     val currentUser = firebaseAuth.currentUser?.email ?: "Unknown"
     val orientation = LocalConfiguration.current.orientation
+
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -129,6 +131,14 @@ fun BeerAdd(
                     ) {
                         Text("Add Beer")
                     }
+                }
+                // "Take a Photo" button
+                Button(onClick = {
+                    // Use a URI to navigate to the image labeling screen (if necessary)
+                    val savedUri = "your_image_uri_here" // Replace with the actual URI after capturing image
+                    navigateToImageLabelingScreen(savedUri) // Navigate to the image labeling screen
+                }) {
+                    Text("Take a Photo")
                 }
             }
         } else {
@@ -229,6 +239,10 @@ fun BeerAddPreview() {
         )
     }
 }
+
+
+
+
 
 
 

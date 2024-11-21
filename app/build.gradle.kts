@@ -96,4 +96,16 @@ dependencies {
     // Test dependencies
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")  // Replace with actual version
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")  // Replace with actual version
+
+    // Firebase Label Images with ML Kit
+    // Use this dependency to bundle the model with your app
+    implementation ("com.google.mlkit:image-labeling:17.0.9")
+
+    //CameraX
+    implementation ("androidx.camera:camera-core:1.4.0")
+    implementation("androidx.camera:camera-camera2:1.4.0")
+    implementation("androidx.camera:camera-lifecycle:1.4.0")
+    implementation("androidx.camera:camera-view:1.4.0")
+
+
 }
