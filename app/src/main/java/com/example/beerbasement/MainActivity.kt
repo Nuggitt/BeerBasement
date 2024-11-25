@@ -1,15 +1,21 @@
 package com.example.beerbasement
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -17,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -26,28 +33,12 @@ import androidx.navigation.navArgument
 import com.example.beerbasement.model.AuthenticationViewModel
 import com.example.beerbasement.model.Beer
 import com.example.beerbasement.model.BeersViewModelState
-import com.example.beerbasement.screens.Authentication
-import com.example.beerbasement.screens.BeerAdd
-import com.example.beerbasement.screens.BeerList
-import com.example.beerbasement.screens.BeerDetails
+import com.example.beerbasement.screens.*
 import com.example.beerbasement.ui.theme.BeerBasementTheme
-import android.Manifest
-import android.net.Uri
-import android.util.Log
-import android.widget.Toast
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCapture.OutputFileResults
-import androidx.camera.core.ImageCaptureException
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.example.beerbasement.screens.ImageLabelingScreen
 import java.io.File
-
 
 class MainActivity : ComponentActivity() {
     private val CAMERA_PERMISSION_REQUEST_CODE = 100
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,7 +65,51 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Camera permission granted, initialize camera
+                setContent {
+                    BeerBasementTheme {
+                        InitializeCamera()
+                    }
+                }
+            } else {
+                Toast.makeText(this, "Camera permission is required", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+}
 
+@Composable
+fun InitializeCamera() {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    LaunchedEffect(context) {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+        cameraProviderFuture.addListener({
+            try {
+                val cameraProvider = cameraProviderFuture.get()
+                val preview = androidx.camera.core.Preview.Builder().build()
+                val cameraSelector = CameraSelector.Builder()
+                    .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                    .build()
+                val imageCapture = ImageCapture.Builder()
+                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+                    .build()
+
+                cameraProvider.bindToLifecycle(
+                    lifecycleOwner, cameraSelector, preview, imageCapture
+                )
+            } catch (e: Exception) {
+                Toast.makeText(context, "Camera setup failed: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }, ContextCompat.getMainExecutor(context))
+    }
 }
 
 @Composable
@@ -89,58 +124,33 @@ fun MainScreen(modifier: Modifier = Modifier) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val photoFile = File(context.filesDir, "photo.jpg")
 
-
     LaunchedEffect(context) {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-
-        cameraProviderFuture.addListener({
-            try {
-                val cameraProvider = cameraProviderFuture.get()
-
-                // Preview use case
-                val preview = androidx.camera.core.Preview.Builder().build()
-                val cameraSelector = CameraSelector.Builder()
-                    .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-                    .build()
-
-                // Image capture use case
-                val imageCapture = ImageCapture.Builder()
-                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
-                    .build()
-
-                // Bind use cases to lifecycle
-                cameraProvider.bindToLifecycle(
-                    lifecycleOwner, cameraSelector, preview, imageCapture
-                )
-
-                //Image Capture functionality
-                //when user presses the capture button
-
-                val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
-                imageCapture.takePicture(
-                    outputOptions,
-                    ContextCompat.getMainExecutor(context),
-                    object : ImageCapture.OnImageSavedCallback {
-                        override fun onError(exception: ImageCaptureException) {
-                            Log.e(
-                                "CameraX",
-                                "Photo capture failed: ${exception.message}",
-                                exception
-                            )
-                        }
-
-                        override fun onImageSaved(outputFileResults: OutputFileResults) {
-                            val savedUri = outputFileResults.savedUri
-                            Log.d("CameraX", "Photo capture succeeded: $savedUri")
-                        }
-                    })
-            } catch (e: Exception) {
-                // Show error message if camera setup fails
-                Toast.makeText(context, "Camera setup failed: ${e.message}", Toast.LENGTH_LONG)
-                    .show()
-            }
-        }, ContextCompat.getMainExecutor(context))
+        if (ContextCompat.checkSelfPermission(
+                context, Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+            cameraProviderFuture.addListener({
+                try {
+                    val cameraProvider = cameraProviderFuture.get()
+                    val preview = androidx.camera.core.Preview.Builder().build()
+                    val cameraSelector = CameraSelector.Builder()
+                        .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                        .build()
+                    val imageCapture = ImageCapture.Builder()
+                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+                        .build()
+                    cameraProvider.bindToLifecycle(
+                        lifecycleOwner, cameraSelector, preview, imageCapture
+                    )
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Kameraopsætning fejlede: ${e.message}", Toast.LENGTH_LONG)
+                        .show()
+                }
+            }, ContextCompat.getMainExecutor(context))
+        } else {
+            Toast.makeText(context, "Kamera-tilladelse kræves", Toast.LENGTH_SHORT).show()
+        }
     }
 
     NavHost(navController = navController, startDestination = NavRoutes.Login.route) {
@@ -186,8 +196,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 sortByVolume = { viewModel.sortBeersByVolume(ascending = it) },
                 filterByTitle = { viewModel.filterByTitle(it) },
                 navigateToUrlSite = { url -> viewModel.navigateToUrlSite(context, url) }
-
-
             )
         }
         composable(
@@ -221,7 +229,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     )
                 },
                 navigateToUrlSite = { url -> viewModel.navigateToUrlSite(context, url) }
-
             )
         }
         composable(NavRoutes.BeerAdd.route) {
@@ -229,20 +236,31 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 modifier = modifier,
                 onNavigateBack = { navController.popBackStack() },
                 addBeer = { beer -> viewModel.addBeer(beer) },
+                navController = navController,
             )
         }
 
-        composable(NavRoutes.ImageLabelingScreen.route,
-            arguments = listOf(navArgument("savedUri") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val savedUriString = backStackEntry.arguments?.getString("savedUri") ?: ""
-            val savedUri = Uri.parse(savedUriString) // Convert string to Uri
-            ImageLabelingScreen(savedUri = savedUri)
+        composable(NavRoutes.CameraScreen.route) {
+            CameraScreen { capturedUri ->
+                // Navigate to ImageLabelingScreen with the captured URI
+                navController.navigate(
+                    NavRoutes.ImageLabelingScreen.createRoute(capturedUri.toString())
+                )
+            }
         }
 
+        // New ImageLabelingScreen destination
+        composable(
+            route = NavRoutes.ImageLabelingScreen.route,
+            arguments = listOf(navArgument("savedUri") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val savedUriString = backStackEntry.arguments?.getString("savedUri")
+            if (savedUriString != null) {
+                ImageLabelingScreen(savedUri = Uri.parse(savedUriString))
+            }
+        }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

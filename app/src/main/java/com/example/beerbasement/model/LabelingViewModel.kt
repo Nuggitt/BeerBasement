@@ -1,12 +1,14 @@
 package com.example.beerbasement.model
 
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.State
 import androidx.lifecycle.ViewModel
 
 class LabelingViewModel : ViewModel() {
-    var labels: List<String> by mutableStateOf(emptyList())
+    private val _labels = mutableStateOf<List<String>>(emptyList())
+    val labels: State<List<String>> get() = _labels
 
-
+    fun updateLabels(newLabels: List<String>) {
+        _labels.value = newLabels
+    }
 }

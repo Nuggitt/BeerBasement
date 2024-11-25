@@ -5,6 +5,9 @@ sealed class NavRoutes(val route: String) {
     data object BeerAdd : NavRoutes("add")
     data object BeerDetails : NavRoutes("details")
     data object Login : NavRoutes("login")
-    object ImageLabelingScreen : NavRoutes("imageLabelingScreen/{savedUri}")
+    object CameraScreen : NavRoutes("camera_screen")
+    object ImageLabelingScreen : NavRoutes("image_labeling_screen/{savedUri}") {
+        fun createRoute(savedUri: String) = "image_labeling_screen/$savedUri"
+    }
 
 }

@@ -1,14 +1,17 @@
 package com.example.beerbasement.screens
 
+import android.graphics.BitmapFactory
 import android.net.Uri
-import android.provider.MediaStore
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.beerbasement.model.LabelingViewModel
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
@@ -16,45 +19,41 @@ import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 @Composable
 fun ImageLabelingScreen(savedUri: Uri) {
     val context = LocalContext.current
+    var labels by remember { mutableStateOf(listOf<String>()) }
 
-    // Access the ViewModel
-    val labelingViewModel = viewModel<LabelingViewModel>()
-
-    // Try to load the bitmap from the URI
-    val bitmap = try {
-        MediaStore.Images.Media.getBitmap(context.contentResolver, savedUri)
-    } catch (e: Exception) {
-        Log.e("ImageLabeling", "Error converting image URI to Bitmap: ${e.message}")
-        null
+    // Load the bitmap from the URI
+    val bitmap = remember(savedUri) {
+        try {
+            val inputStream = context.contentResolver.openInputStream(savedUri)
+            BitmapFactory.decodeStream(inputStream)
+        } catch (e: Exception) {
+            Log.e("ImageLabeling", "Error loading bitmap: ${e.message}")
+            null
+        }
     }
 
-    // Process the image and update the ViewModel's labels
+    // Process the image with ML Kit
     bitmap?.let {
         val inputImage = InputImage.fromBitmap(it, 0)
-        val imageLabeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
+        val labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
 
-        imageLabeler.process(inputImage)
-            .addOnSuccessListener { labels ->
-                val labelList = labels.map { it.text }
-                // Update the ViewModel's labels
-                labelingViewModel.labels = labelList
-            }
-            .addOnFailureListener { e ->
-                Log.e("ImageLabeling", "Failed to label image: ${e.message}")
-            }
+        LaunchedEffect(inputImage) {
+            labeler.process(inputImage)
+                .addOnSuccessListener { imageLabels ->
+                    labels = imageLabels.map { it.text }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("ImageLabeling", "Labeling failed: ${e.message}")
+                }
+        }
     } ?: run {
-        Log.e("ImageLabeling", "Bitmap is null, cannot process image.")
+        Log.e("ImageLabeling", "Bitmap is null")
     }
 
-    // Display the labels from the ViewModel
-    DisplayLabels(labelingViewModel.labels)
-}
-
-@Composable
-fun DisplayLabels(labelList: List<String>) {
+    // Display the labels
     Column {
         Text("Detected Labels:")
-        labelList.forEach { label ->
+        labels.forEach { label ->
             Text(label)
         }
     }

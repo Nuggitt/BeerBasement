@@ -1,4 +1,5 @@
 package com.example.beerbasement.screens
+
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,13 +30,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.beerbasement.NavRoutes
 import com.example.beerbasement.model.Beer
 import com.example.beerbasement.ui.theme.BeerBasementTheme
 import com.google.firebase.auth.FirebaseAuth
+import android.content.Intent
+import android.net.Uri
+import android.os.Environment
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BeerAdd(
+    navController: NavController,
     modifier: Modifier = Modifier,
     onNavigateBack: () -> Unit = {},
     addBeer: (Beer) -> Unit = {},
@@ -52,7 +68,6 @@ fun BeerAdd(
     val firebaseAuth = FirebaseAuth.getInstance()
     val currentUser = firebaseAuth.currentUser?.email ?: "Unknown"
     val orientation = LocalConfiguration.current.orientation
-
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -134,10 +149,10 @@ fun BeerAdd(
                 }
                 // "Take a Photo" button
                 Button(onClick = {
-                    // Use a URI to navigate to the image labeling screen (if necessary)
-                    val savedUri = "your_image_uri_here" // Replace with the actual URI after capturing image
-                    navigateToImageLabelingScreen(savedUri) // Navigate to the image labeling screen
-                }) {
+                    // Replace with the actual URI after capturing image
+                    val savedUri = "your_image_uri_here"
+                    navController.navigate(NavRoutes.CameraScreen.route)
+                }, modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
                     Text("Take a Photo")
                 }
             }
@@ -227,11 +242,14 @@ fun BeerAdd(
     }
 }
 
+
+
 @Preview(showBackground = true, name = "BeerAdd Preview")
 @Composable
 fun BeerAddPreview() {
     BeerBasementTheme {
         BeerAdd(
+            navController = rememberNavController(),
             modifier = Modifier,
             onNavigateBack = {},
             addBeer = {},
@@ -239,12 +257,3 @@ fun BeerAddPreview() {
         )
     }
 }
-
-
-
-
-
-
-
-
-
