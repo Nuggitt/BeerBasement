@@ -10,6 +10,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,13 +21,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.navigation.NavController
+import com.example.beerbasement.NavRoutes
 import java.io.File
 
+
 @Composable
-fun CameraScreen(onImageCaptured: (Uri) -> Unit) {
+fun CameraScreen(navController: NavController, onImageCaptured: (Uri) -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val executor = ContextCompat.getMainExecutor(context)
@@ -66,37 +71,51 @@ fun CameraScreen(onImageCaptured: (Uri) -> Unit) {
             }, executor)
         }
 
-        // Capture button
-        Button(
-            onClick = {
-                imageCapture?.let { capture ->
-                    val photoFile = File(
-                        context.externalMediaDirs.first(),
-                        "captured_image_${System.currentTimeMillis()}.jpg"
-                    )
-                    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
-                    capture.takePicture(
-                        outputOptions,
-                        executor,
-                        object : ImageCapture.OnImageSavedCallback {
-                            override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                                val savedUri = Uri.fromFile(photoFile)
-                                Log.d("CameraScreen", "Image captured: $savedUri")
-                                onImageCaptured(savedUri)
-                            }
-
-                            override fun onError(exception: ImageCaptureException) {
-                                Log.e("CameraScreen", "Image capture failed: ${exception.message}")
-                            }
-                        }
-                    )
-                }
-            },
-            modifier = Modifier.align(Alignment.BottomCenter)
+        // Capture button with adjusted positioning
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 100.dp) // Adjust padding to move the button upwards
         ) {
-            Text("Capture")
+            Button(
+                onClick = {
+                    imageCapture?.let { capture ->
+                        val photoFile = File(
+                            context.externalMediaDirs.first(),
+                            "captured_image_${System.currentTimeMillis()}.jpg"
+                        )
+                        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+
+                        capture.takePicture(
+                            outputOptions,
+                            executor,
+                            object : ImageCapture.OnImageSavedCallback {
+                                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                                    val savedUri = Uri.fromFile(photoFile)
+                                    Log.d("CameraScreen", "Image captured: $savedUri")
+                                    // Ensure navigation to ImageLabelingScreen
+                                    onImageCaptured(savedUri)
+                                    // Navigate directly after image capture
+                                    navController.navigate(
+                                        NavRoutes.ImageLabelingScreen.createRoute(savedUri.toString())
+                                    )
+                                }
+
+                                override fun onError(exception: ImageCaptureException) {
+                                    Log.e("CameraScreen", "Image capture failed: ${exception.message}")
+                                }
+                            }
+                        )
+                    }
+                },
+                modifier = Modifier.align(Alignment.BottomCenter)
+            ) {
+                Text("Capture")
+            }
         }
     }
 }
+
+
+
 

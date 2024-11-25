@@ -25,6 +25,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -240,23 +241,23 @@ fun MainScreen(modifier: Modifier = Modifier) {
             )
         }
 
+        // CameraScreen navigation logic
         composable(NavRoutes.CameraScreen.route) {
-            CameraScreen { capturedUri ->
-                // Navigate to ImageLabelingScreen with the captured URI
+            CameraScreen(navController = navController) { capturedUri ->
+                // Handle URI and navigate to ImageLabelingScreen
                 navController.navigate(
                     NavRoutes.ImageLabelingScreen.createRoute(capturedUri.toString())
                 )
             }
         }
 
-        // New ImageLabelingScreen destination
         composable(
             route = NavRoutes.ImageLabelingScreen.route,
             arguments = listOf(navArgument("savedUri") { type = NavType.StringType })
         ) { backStackEntry ->
             val savedUriString = backStackEntry.arguments?.getString("savedUri")
-            if (savedUriString != null) {
-                ImageLabelingScreen(savedUri = Uri.parse(savedUriString))
+            savedUriString?.let {
+                ImageLabelingScreen(savedUri = Uri.parse(it))
             }
         }
     }
