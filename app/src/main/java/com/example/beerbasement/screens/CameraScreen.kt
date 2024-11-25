@@ -53,11 +53,11 @@ fun CameraScreen(navController: NavController, onImageCaptured: (Uri) -> Unit) {
                     it.setSurfaceProvider(previewView.surfaceProvider)
                 }
 
-                imageCapture = ImageCapture.Builder().build()
-
-                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
                 try {
+                    imageCapture = ImageCapture.Builder().build()
+
+                    val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
                     cameraProvider.unbindAll()
                     cameraProvider.bindToLifecycle(
                         lifecycleOwner,
@@ -65,8 +65,9 @@ fun CameraScreen(navController: NavController, onImageCaptured: (Uri) -> Unit) {
                         preview,
                         imageCapture
                     )
+                    Log.d("CameraScreen", "Camera initialized successfully")
                 } catch (exc: Exception) {
-                    Log.e("CameraScreen", "Use case binding failed", exc)
+                    Log.e("CameraScreen", "Camera initialization failed: ${exc.message}")
                 }
             }, executor)
         }
@@ -86,26 +87,28 @@ fun CameraScreen(navController: NavController, onImageCaptured: (Uri) -> Unit) {
                         )
                         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
-                        capture.takePicture(
-                            outputOptions,
-                            executor,
-                            object : ImageCapture.OnImageSavedCallback {
-                                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                                    val savedUri = Uri.fromFile(photoFile)
-                                    Log.d("CameraScreen", "Image captured: $savedUri")
-                                    // Ensure navigation to ImageLabelingScreen
-                                    onImageCaptured(savedUri)
-                                    // Navigate directly after image capture
-                                    navController.navigate(
-                                        NavRoutes.ImageLabelingScreen.createRoute(savedUri.toString())
-                                    )
-                                }
+                        try {
+                            capture.takePicture(
+                                outputOptions,
+                                executor,
+                                object : ImageCapture.OnImageSavedCallback {
+                                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                                        val savedUri = Uri.fromFile(photoFile)
+                                        Log.d("CameraScreen", "Image captured: $savedUri")
+                                        onImageCaptured(savedUri)
+                                        navController.navigate(
+                                            NavRoutes.ImageLabelingScreen.createRoute(savedUri.toString())
+                                        )
+                                    }
 
-                                override fun onError(exception: ImageCaptureException) {
-                                    Log.e("CameraScreen", "Image capture failed: ${exception.message}")
+                                    override fun onError(exception: ImageCaptureException) {
+                                        Log.e("CameraScreen", "Image capture failed: ${exception.message} CATASTROPHIC FAILURE")
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        } catch (e: Exception) {
+                            Log.e("CameraScreen", "Error capturing image: ${e.message}")
+                        }
                     }
                 },
                 modifier = Modifier.align(Alignment.BottomCenter)
