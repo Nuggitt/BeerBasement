@@ -80,7 +80,6 @@ dependencies {
     // Jetpack Compose Material 3
     implementation("androidx.compose.material3:material3:1.3.1")
     implementation("androidx.compose.material:material-icons-extended:1.7.5")
-    
 
     // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.7.0")
@@ -96,4 +95,25 @@ dependencies {
     // Test dependencies
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")  // Replace with actual version
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")  // Replace with actual version
+
+    // To recognize Latin script
+    implementation("com.google.mlkit:text-recognition:16.0.1")
+
+    // To recognize Chinese script
+    implementation("com.google.mlkit:text-recognition-chinese:16.0.1")
+
+    // To recognize Devanagari script
+    implementation("com.google.mlkit:text-recognition-devanagari:16.0.1")
+
+    // To recognize Japanese script
+    implementation("com.google.mlkit:text-recognition-japanese:16.0.1")
+
+    // To recognize Korean script
+    implementation("com.google.mlkit:text-recognition-korean:16.0.1")
+
+    implementation("androidx.camera:camera-core:1.4.0")
+    implementation("androidx.camera:camera-view:1.4.0")
+    implementation("androidx.camera:camera-lifecycle:1.4.0")
+
+    implementation("androidx.camera:camera-camera2:1.4.0")
 }

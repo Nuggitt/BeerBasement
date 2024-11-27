@@ -1,4 +1,5 @@
 package com.example.beerbasement.screens
+
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,13 +30,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.beerbasement.NavRoutes
 import com.example.beerbasement.model.Beer
 import com.example.beerbasement.ui.theme.BeerBasementTheme
 import com.google.firebase.auth.FirebaseAuth
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BeerAdd(
+    navController: NavController,
     modifier: Modifier = Modifier,
     onNavigateBack: () -> Unit = {},
     addBeer: (Beer) -> Unit = {},
@@ -130,6 +136,12 @@ fun BeerAdd(
                         Text("Add Beer")
                     }
                 }
+                // "Take a Photo" button
+                Button(onClick = {
+                    navController.navigate(NavRoutes.CameraScreen.route)
+                }, modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
+                    Text("Take a Photo")
+                }
             }
         } else {
             // Landscape Mode
@@ -217,11 +229,14 @@ fun BeerAdd(
     }
 }
 
+
+
 @Preview(showBackground = true, name = "BeerAdd Preview")
 @Composable
 fun BeerAddPreview() {
     BeerBasementTheme {
         BeerAdd(
+            navController = rememberNavController(),
             modifier = Modifier,
             onNavigateBack = {},
             addBeer = {},
@@ -229,8 +244,3 @@ fun BeerAddPreview() {
         )
     }
 }
-
-
-
-
-
