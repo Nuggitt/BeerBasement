@@ -1,6 +1,8 @@
 package com.example.beerbasement.screens
 
+import android.content.Context
 import android.net.Uri
+import android.os.Environment
 import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -29,9 +31,11 @@ import androidx.navigation.NavController
 import com.example.beerbasement.NavRoutes
 import java.io.File
 
-
 @Composable
-fun CameraScreen(navController: NavController, onImageCaptured: (Uri) -> Unit) {
+fun CameraScreen(
+    navController: NavController,
+    onImageCaptured: (Uri) -> Unit
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val executor = ContextCompat.getMainExecutor(context)
@@ -39,7 +43,9 @@ fun CameraScreen(navController: NavController, onImageCaptured: (Uri) -> Unit) {
     var imageCapture: ImageCapture? by remember { mutableStateOf(null) }
 
     // Camera preview setup
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
         val previewView = remember { PreviewView(context) }
         AndroidView(
             factory = { previewView },
@@ -53,18 +59,19 @@ fun CameraScreen(navController: NavController, onImageCaptured: (Uri) -> Unit) {
                     it.setSurfaceProvider(previewView.surfaceProvider)
                 }
 
+                val imageCaptureInstance = ImageCapture.Builder().build()
+
+                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
                 try {
-                    imageCapture = ImageCapture.Builder().build()
-
-                    val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
                     cameraProvider.unbindAll()
                     cameraProvider.bindToLifecycle(
                         lifecycleOwner,
                         cameraSelector,
                         preview,
-                        imageCapture
+                        imageCaptureInstance
                     )
+                    imageCapture = imageCaptureInstance
                     Log.d("CameraScreen", "Camera initialized successfully")
                 } catch (exc: Exception) {
                     Log.e("CameraScreen", "Camera initialization failed: ${exc.message}")
@@ -73,52 +80,51 @@ fun CameraScreen(navController: NavController, onImageCaptured: (Uri) -> Unit) {
         }
 
         // Capture button with adjusted positioning
-        Box(
+        Button(
+            onClick = { captureImage(context, imageCapture!!, onImageCaptured, navController) },
             modifier = Modifier
-                .fillMaxSize()
+                .align(Alignment.BottomCenter)
                 .padding(bottom = 100.dp) // Adjust padding to move the button upwards
         ) {
-            Button(
-                onClick = {
-                    imageCapture?.let { capture ->
-                        val photoFile = File(
-                            context.externalMediaDirs.first(),
-                            "captured_image_${System.currentTimeMillis()}.jpg"
-                        )
-                        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
-                        try {
-                            capture.takePicture(
-                                outputOptions,
-                                executor,
-                                object : ImageCapture.OnImageSavedCallback {
-                                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                                        val savedUri = Uri.fromFile(photoFile)
-                                        Log.d("CameraScreen", "Image captured: $savedUri")
-                                        onImageCaptured(savedUri)
-                                        navController.navigate(
-                                            NavRoutes.ImageLabelingScreen.createRoute(savedUri.toString())
-                                        )
-                                    }
-
-                                    override fun onError(exception: ImageCaptureException) {
-                                        Log.e("CameraScreen", "Image capture failed: ${exception.message} CATASTROPHIC FAILURE")
-                                    }
-                                }
-                            )
-                        } catch (e: Exception) {
-                            Log.e("CameraScreen", "Error capturing image: ${e.message}")
-                        }
-                    }
-                },
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
-                Text("Capture")
-            }
+            Text("Capture")
         }
     }
 }
 
+private fun captureImage(
+    context: Context,
+    imageCapture: ImageCapture,
+    onImageCaptured: (Uri) -> Unit,
+    navController: NavController
+) {
+    val outputDirectory = File(
+        context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+        "BeerBasement"
+    ).apply { mkdirs() }
 
+    val photoFile = File(
+        outputDirectory,
+        "captured_image_${System.currentTimeMillis()}.jpg"
+    )
 
+    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
+    imageCapture.takePicture(
+        outputOptions,
+        ContextCompat.getMainExecutor(context),
+        object : ImageCapture.OnImageSavedCallback {
+            override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                val savedUri = Uri.fromFile(photoFile)
+                Log.d("CameraScreen", "Image captured: $savedUri")
+                onImageCaptured(savedUri)
+                navController.navigate(
+                    NavRoutes.ImageLabelingScreen.createRoute(savedUri.toString())
+                )
+            }
+
+            override fun onError(exception: ImageCaptureException) {
+                Log.e("CameraScreen", "Image capture failed: ${exception.message}")
+            }
+        }
+    )
+}

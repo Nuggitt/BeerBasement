@@ -36,16 +36,6 @@ import com.example.beerbasement.NavRoutes
 import com.example.beerbasement.model.Beer
 import com.example.beerbasement.ui.theme.BeerBasementTheme
 import com.google.firebase.auth.FirebaseAuth
-import android.content.Intent
-import android.net.Uri
-import android.os.Environment
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.FileProvider
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,7 +46,6 @@ fun BeerAdd(
     onNavigateBack: () -> Unit = {},
     addBeer: (Beer) -> Unit = {},
     signOut: () -> Unit = { FirebaseAuth.getInstance().signOut() },
-    navigateToImageLabelingScreen: (String) -> Unit = {}
 ) {
     var title by rememberSaveable { mutableStateOf("") }
     var brewery by rememberSaveable { mutableStateOf("") }
@@ -149,8 +138,6 @@ fun BeerAdd(
                 }
                 // "Take a Photo" button
                 Button(onClick = {
-                    // Replace with the actual URI after capturing image
-                    val savedUri = "your_image_uri_here"
                     navController.navigate(NavRoutes.CameraScreen.route)
                 }, modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
                     Text("Take a Photo")
