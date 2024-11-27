@@ -2,6 +2,7 @@ package com.example.beerbasement
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -124,32 +125,11 @@ fun MainScreen(modifier: Modifier = Modifier) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val photoFile = File(context.filesDir, "photo.jpg")
 
-    LaunchedEffect(context) {
-        if (ContextCompat.checkSelfPermission(
-                context, Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-            cameraProviderFuture.addListener({
-                try {
-                    val cameraProvider = cameraProviderFuture.get()
-                    val preview = androidx.camera.core.Preview.Builder().build()
-                    val cameraSelector = CameraSelector.Builder()
-                        .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-                        .build()
-                    val imageCapture = ImageCapture.Builder()
-                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
-                        .build()
-                    cameraProvider.bindToLifecycle(
-                        lifecycleOwner, cameraSelector, preview, imageCapture
-                    )
-                } catch (e: Exception) {
-                    Toast.makeText(context, "Kameraopsætning fejlede: ${e.message}", Toast.LENGTH_LONG)
-                        .show()
-                }
-            }, ContextCompat.getMainExecutor(context))
-        } else {
-            Toast.makeText(context, "Kamera-tilladelse kræves", Toast.LENGTH_SHORT).show()
+    LaunchedEffect(user) {
+        user?.email?.let {
+            viewModel.getBeersByUsername(it) // Fetch beers for the specific user
+        } ?: run {
+            viewModel.clearBeers() // Clear beers if no user is logged in
         }
     }
 
@@ -159,24 +139,14 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 modifier = modifier,
                 user = authenticationViewModel.user,
                 message = authenticationViewModel.message,
-                signIn = { email, password ->
-                    authenticationViewModel.signIn(email, password)
-                },
+                signIn = { email, password -> authenticationViewModel.signIn(email, password) },
                 register = { email, password -> authenticationViewModel.register(email, password) },
                 navigateToNextScreen = { navController.navigate(NavRoutes.BeerList.route) }
             )
         }
         composable(NavRoutes.BeerList.route) {
-            LaunchedEffect(user) {
-                user?.email?.let {
-                    viewModel.getBeersByUsername(it) // Fetch beers for the specific user
-                } ?: run {
-                    viewModel.clearBeers() // Clear beers if no user is logged in
-                }
-            }
             BeerList(
-                modifier = modifier
-                    .fillMaxSize(),
+                modifier = modifier.fillMaxSize(),
                 beers = beers,
                 errorMessage = errorMessage,
                 onBeerSelected = { beer -> navController.navigate(NavRoutes.BeerDetails.route + "/${beer.id}") },
@@ -222,12 +192,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     authenticationViewModel.signOut()
                     viewModel.clearBeers() // Clear beers on sign out
                 },
-                onUpdate = { beerid: Int, updatedBeer: Beer ->
-                    viewModel.updateBeer(
-                        beerid,
-                        updatedBeer
-                    )
-                },
+                onUpdate = { beerid: Int, updatedBeer: Beer -> viewModel.updateBeer(beerid, updatedBeer) },
                 navigateToUrlSite = { url -> viewModel.navigateToUrlSite(context, url) }
             )
         }
@@ -240,10 +205,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
             )
         }
 
-        // CameraScreen navigation logic
         composable(NavRoutes.CameraScreen.route) {
             CameraScreen(navController = navController) { capturedUri ->
-                // Handle URI and navigate to TextScannerScreen
                 navController.navigate(
                     NavRoutes.TextScannerScreen.createRoute(capturedUri.toString())
                 )
@@ -256,8 +219,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
         ) { backStackEntry ->
             val savedUriString = backStackEntry.arguments?.getString("savedUri")
             savedUriString?.let {
-                // Pass the navController and the recognized text (savedUriString)
-                TextScannerScreen(recognizedText = it, navController = navController)
+                // Convert the string to Uri
+                val savedUri = Uri.parse(it)
+                TextScannerScreen(savedUri = savedUri)
             }
         }
     }
