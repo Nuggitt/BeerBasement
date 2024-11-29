@@ -43,9 +43,11 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
+
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes.add("META-INF/{AL2.0,LGPL2.1}")  // Exclude conflicting resources
+            excludes.add("META-INF/DEPENDENCIES")     // Exclude the DEPENDENCIES file
         }
     }
 }
@@ -80,7 +82,6 @@ dependencies {
     // Jetpack Compose Material 3
     implementation("androidx.compose.material3:material3:1.3.1")
     implementation("androidx.compose.material:material-icons-extended:1.7.5")
-    
 
     // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.7.0")
@@ -96,4 +97,8 @@ dependencies {
     // Test dependencies
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")  // Replace with actual version
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")  // Replace with actual version
+
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.17.0")
+
+    implementation ("androidx.activity:activity-ktx:1.6.0")
 }

@@ -1,19 +1,24 @@
 package com.example.beerbasement
 
-import android.content.res.Configuration
+import ImageDataScreen
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -25,14 +30,29 @@ import com.example.beerbasement.model.Beer
 import com.example.beerbasement.model.BeersViewModelState
 import com.example.beerbasement.screens.Authentication
 import com.example.beerbasement.screens.BeerAdd
-import com.example.beerbasement.screens.BeerList
 import com.example.beerbasement.screens.BeerDetails
+import com.example.beerbasement.screens.BeerList
 import com.example.beerbasement.ui.theme.BeerBasementTheme
+import com.google.firebase.auth.FirebaseAuth
+import android.Manifest
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.wear.compose.material.MaterialTheme
 
 class MainActivity : ComponentActivity() {
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Enable edge-to-edge UI
         enableEdgeToEdge()
+
+        // Initialize Firebase Auth
+        auth = FirebaseAuth.getInstance()
+
+        // Set up the UI
         setContent {
             BeerBasementTheme {
                 MainScreen()
@@ -51,19 +71,38 @@ fun MainScreen(modifier: Modifier = Modifier) {
     val user = authenticationViewModel.user
     val context = LocalContext.current
 
+    // Define permission launcher for camera access
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            if (isGranted) {
+                startCameraIntent(context) // Proceed with camera if permission granted
+            } else {
+                Toast.makeText(context, "Camera permission is required", Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
+
+    // Button to request camera permission
+    Button(onClick = {
+        permissionLauncher.launch(Manifest.permission.CAMERA)
+    }) {
+        Text("Take a Photo")
+    }
+
+    // Navigation setup for different screens
     NavHost(navController = navController, startDestination = NavRoutes.Login.route) {
         composable(NavRoutes.Login.route) {
             Authentication(
                 modifier = modifier,
                 user = authenticationViewModel.user,
                 message = authenticationViewModel.message,
-                signIn = { email, password ->
-                    authenticationViewModel.signIn(email, password)
-                },
+                signIn = { email, password -> authenticationViewModel.signIn(email, password) },
                 register = { email, password -> authenticationViewModel.register(email, password) },
                 navigateToNextScreen = { navController.navigate(NavRoutes.BeerList.route) }
             )
         }
+
         composable(NavRoutes.BeerList.route) {
             LaunchedEffect(user) {
                 user?.email?.let {
@@ -73,8 +112,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 }
             }
             BeerList(
-                modifier = modifier
-                    .fillMaxSize(),
+                modifier = modifier.fillMaxSize(),
                 beers = beers,
                 errorMessage = errorMessage,
                 onBeerSelected = { beer -> navController.navigate(NavRoutes.BeerDetails.route + "/${beer.id}") },
@@ -94,10 +132,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 sortByVolume = { viewModel.sortBeersByVolume(ascending = it) },
                 filterByTitle = { viewModel.filterByTitle(it) },
                 navigateToUrlSite = { url -> viewModel.navigateToUrlSite(context, url) }
-
-
             )
         }
+
         composable(
             NavRoutes.BeerDetails.route + "/{beerId}",
             arguments = listOf(navArgument("beerId") { type = NavType.IntType })
@@ -123,25 +160,45 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     viewModel.clearBeers() // Clear beers on sign out
                 },
                 onUpdate = { beerid: Int, updatedBeer: Beer ->
-                    viewModel.updateBeer(
-                        beerid,
-                        updatedBeer
-                    )
+                    viewModel.updateBeer(beerid, updatedBeer)
                 },
                 navigateToUrlSite = { url -> viewModel.navigateToUrlSite(context, url) }
-
             )
         }
+
         composable(NavRoutes.BeerAdd.route) {
             BeerAdd(
-                modifier = modifier,
+                modifier = Modifier,
                 onNavigateBack = { navController.popBackStack() },
                 addBeer = { beer -> viewModel.addBeer(beer) },
+                navController = navController
             )
+        }
+
+        composable(NavRoutes.ImageDataScreen.route) { navBackStackEntry ->
+            val photoUriString = navBackStackEntry.arguments?.getString("photoUri")
+            val photoUri = photoUriString?.let { Uri.parse(it) }
+
+            // Check if the URI is valid
+            if (photoUri != null) {
+                // Display the ImageDataScreen with the photo URI
+                ImageDataScreen(imageUri = photoUri)
+            } else {
+                // Handle the case where URI is missing or invalid
+                Text(
+                    text = "Invalid or missing photo URI",
+                    style = MaterialTheme.typography.title1,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
         }
     }
 }
 
+private fun startCameraIntent(context: Context) {
+    val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+    context.startActivity(cameraIntent)
+}
 
 @Preview(showBackground = true)
 @Composable
