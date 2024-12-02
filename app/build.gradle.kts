@@ -30,16 +30,20 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
     buildFeatures {
         compose = true
     }
+
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
@@ -48,11 +52,13 @@ android {
         resources {
             excludes.add("META-INF/{AL2.0,LGPL2.1}")  // Exclude conflicting resources
             excludes.add("META-INF/DEPENDENCIES")     // Exclude the DEPENDENCIES file
+            excludes.add("META-INF/INDEX.LIST")       // Exclude the INDEX.LIST file
         }
     }
 }
 
 dependencies {
+    // Android & Jetpack libraries
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -67,6 +73,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.firebase.common.ktx)
     implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.animation.core.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -98,7 +105,14 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")  // Replace with actual version
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")  // Replace with actual version
 
+    // Google Cloud Vision API
     implementation("com.google.auth:google-auth-library-oauth2-http:1.17.0")
+    implementation("com.google.android.gms:play-services-vision:20.1.3")
+    implementation("com.google.cloud:google-cloud-vision:3.52.0")
+    implementation("com.google.protobuf:protobuf-java-util:3.25.5")
 
-    implementation ("androidx.activity:activity-ktx:1.6.0")
+
+
+    // Other dependencies
+    implementation("androidx.activity:activity-ktx:1.9.3")
 }

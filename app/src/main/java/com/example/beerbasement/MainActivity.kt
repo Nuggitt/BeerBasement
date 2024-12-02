@@ -6,25 +6,25 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.wear.compose.material.MaterialTheme
 import com.example.beerbasement.model.AuthenticationViewModel
 import com.example.beerbasement.model.Beer
 import com.example.beerbasement.model.BeersViewModelState
@@ -34,11 +34,6 @@ import com.example.beerbasement.screens.BeerDetails
 import com.example.beerbasement.screens.BeerList
 import com.example.beerbasement.ui.theme.BeerBasementTheme
 import com.google.firebase.auth.FirebaseAuth
-import android.Manifest
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.MaterialTheme
 
 class MainActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
@@ -70,10 +65,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
     val errorMessage = viewModel.errorMessage.value
     val user = authenticationViewModel.user
     val context = LocalContext.current
-
-
-
-
 
     // Navigation setup for different screens
     NavHost(navController = navController, startDestination = NavRoutes.Login.route) {
