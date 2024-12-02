@@ -83,12 +83,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
         }
     )
 
-    // Button to request camera permission
-    Button(onClick = {
-        permissionLauncher.launch(Manifest.permission.CAMERA)
-    }) {
-        Text("Take a Photo")
-    }
+
 
     // Navigation setup for different screens
     NavHost(navController = navController, startDestination = NavRoutes.Login.route) {
@@ -175,19 +170,26 @@ fun MainScreen(modifier: Modifier = Modifier) {
             )
         }
 
-        composable(NavRoutes.ImageDataScreen.route) { navBackStackEntry ->
+        composable(
+            route = NavRoutes.ImageDataScreen.route,
+            arguments = listOf(
+                navArgument("photoUri") {
+                    type = NavType.StringType
+                    nullable = false
+                }
+            )
+        ) { navBackStackEntry ->
             val photoUriString = navBackStackEntry.arguments?.getString("photoUri")
             val photoUri = photoUriString?.let { Uri.parse(it) }
 
-            // Check if the URI is valid
             if (photoUri != null) {
-                // Display the ImageDataScreen with the photo URI
+                // Pass the parsed URI to ImageDataScreen
                 ImageDataScreen(imageUri = photoUri)
             } else {
-                // Handle the case where URI is missing or invalid
+                // Handle missing or invalid URI
                 Text(
                     text = "Invalid or missing photo URI",
-                    style = MaterialTheme.typography.title1,
+                    style = MaterialTheme.typography.body1,
                     modifier = Modifier.padding(16.dp)
                 )
             }

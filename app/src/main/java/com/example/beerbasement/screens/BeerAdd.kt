@@ -23,6 +23,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
+import com.example.beerbasement.NavRoutes
 import com.example.beerbasement.model.Beer
 import com.google.firebase.auth.FirebaseAuth
 import java.io.File
@@ -66,10 +67,8 @@ fun BeerAdd(
         onResult = { success ->
             if (success) {
                 imageUri?.let { uri ->
-                    // Log the URI for debugging
-                    Log.d("BeerAdd", "Captured image URI: $uri")
-                    // Navigating to the next screen with the captured image URI
-                    navController.navigate("imageData/${uri.toString()}")
+                    val encodedUri = Uri.encode(uri.toString())
+                    navController.navigate(NavRoutes.ImageDataScreen.createRoute(encodedUri))
                 } ?: run {
                     Log.e("BeerAdd", "Image URI is null")
                 }
@@ -130,12 +129,25 @@ fun BeerAdd(
                 }
 
                 Button(onClick = {
-                    val uri = createImageFile(context)
-                    if (uri != null) {
-                        imageUri = uri
-                        takePictureLauncher.launch(uri)
+                    val hasCameraPermission = ContextCompat.checkSelfPermission(
+                        context, android.Manifest.permission.CAMERA
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                    if (!hasCameraPermission) {
+                        ActivityCompat.requestPermissions(
+                            context as Activity,
+                            arrayOf(android.Manifest.permission.CAMERA),
+                            CAMERA_PERMISSION_REQUEST_CODE
+                        )
                     } else {
-                        Toast.makeText(context, "Failed to create image file.", Toast.LENGTH_SHORT).show()
+                        // Proceed to take a picture
+                        val uri = createImageFile(context)
+                        if (uri != null) {
+                            imageUri = uri
+                            takePictureLauncher.launch(uri)
+                        } else {
+                            Toast.makeText(context, "Failed to create image file.", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }) {
                     Text("Take Picture")

@@ -8,7 +8,7 @@ sealed class NavRoutes(val route: String) {
     data object BeerDetails : NavRoutes("details")
     data object Login : NavRoutes("login")
     object ImageDataScreen : NavRoutes("imageData/{photoUri}") {
-        fun createRoute(photoUri: Uri) = "imageData/${photoUri.toString()}"
+        fun createRoute(photoUri: String): String = "imageData/$photoUri"
     }
 
 }

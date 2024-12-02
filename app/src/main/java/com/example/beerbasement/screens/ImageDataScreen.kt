@@ -9,14 +9,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
+import com.example.beerbasement.R
 
 @Composable
 fun ImageDataScreen(imageUri: Uri) {
-    val painter = rememberAsyncImagePainter(imageUri)
+    val painter = rememberAsyncImagePainter(
+        model = imageUri,
 
-    // Adding a column layout for better UI
+    )
+
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -24,14 +29,19 @@ fun ImageDataScreen(imageUri: Uri) {
         Image(
             painter = painter,
             contentDescription = "Captured Image",
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f), // Keeps the aspect ratio intact
+            alignment = Alignment.Center
         )
+
+        Spacer(modifier = Modifier.height(16.dp)) // Adds space between the image and text
 
         // Optionally add a title or other information about the image
         Text(
             text = "Captured Image",
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.padding(16.dp)
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(top = 8.dp)
         )
     }
 }
