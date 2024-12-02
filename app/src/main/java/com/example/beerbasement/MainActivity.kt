@@ -71,17 +71,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
     val user = authenticationViewModel.user
     val context = LocalContext.current
 
-    // Define permission launcher for camera access
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            if (isGranted) {
-                startCameraIntent(context) // Proceed with camera if permission granted
-            } else {
-                Toast.makeText(context, "Camera permission is required", Toast.LENGTH_SHORT).show()
-            }
-        }
-    )
+
 
 
 
