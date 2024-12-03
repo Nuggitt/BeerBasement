@@ -1,21 +1,24 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Keep all gRPC classes (since they are needed at runtime)
+-keep class io.grpc.** { *; }
+-keep class io.netty.** { *; }
+-keep class org.eclipse.jetty.** { *; }
+-keep class org.slf4j.** { *; }
+-keep class reactor.blockhound.integration.** { *; }
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep all Vision API classes
+-keep class com.google.cloud.vision.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Prevent warnings about missing classes in gRPC or Vision API
+-dontwarn io.grpc.**
+-dontwarn com.google.cloud.vision.**
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# If you use WebView with JavaScript interface, specify it here (uncomment and customize)
+# -keepclassmembers class fqcn.of.javascript.interface.for.webview {
+#    public *;
+# }
+
+# Keep line number and source file attributes for debugging stack traces
+-keepattributes SourceFile,LineNumberTable
+
+# Optionally, rename the source file attribute to hide the original source file name
+# -renamesourcefileattribute SourceFile

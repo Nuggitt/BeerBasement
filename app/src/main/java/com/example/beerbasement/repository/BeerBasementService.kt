@@ -26,9 +26,7 @@ interface BeerBasementService {
     @PUT("beers/{id}")
     fun updateBeer(@Path("id") beerId: Int, @Body beer: Beer): Call<Beer>
 
-    @POST("https://vision.googleapis.com/v1/images:annotate?key=YOUR_API_KEY")
-    @Headers("Content-Type: application/json")
-    fun annotateImage(@Body request: RequestBody): Call<VisionApiResponse>
+
 
 
 

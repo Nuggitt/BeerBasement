@@ -1,3 +1,5 @@
+import org.apache.tools.ant.util.JavaEnvUtils.VERSION_11
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -23,22 +25,21 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
-
             )
         }
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_18
+        targetCompatibility = JavaVersion.VERSION_18
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "18"
     }
 
     buildFeatures {
@@ -76,19 +77,11 @@ dependencies {
     implementation(libs.firebase.common.ktx)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.animation.core.android)
-    implementation(libs.play.services.vision)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
 
-    // Retrofit & Gson
+    // Retrofit & OkHttp
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-    implementation ("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // Jetpack Compose Material 3
     implementation("androidx.compose.material3:material3:1.3.1")
@@ -106,18 +99,23 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata:1.7.5") // observeAsState
 
     // Test dependencies
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")  // Replace with actual version
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")  // Replace with actual version
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")
 
     // Google Cloud Vision API
     implementation("com.google.auth:google-auth-library-oauth2-http:1.30.0")
-    implementation("com.google.protobuf:protobuf-java-util:4.29.0")
-
-    // If you are using Vision API, you might also need these
     implementation("com.google.cloud:google-cloud-vision:3.52.0")
 
     // Other dependencies
     implementation("androidx.activity:activity-ktx:1.9.3")
 
-
+    // gRPC dependencies
+    implementation("io.grpc:grpc-core:1.68.2")
+    implementation("io.grpc:grpc-okhttp:1.68.2") // Ensure this is included
+    implementation("io.grpc:grpc-netty-shaded:1.68.2") // Ensure this is included
+    implementation("io.grpc:grpc-protobuf:1.68.2")
+    implementation("io.grpc:grpc-stub:1.68.2")
+    implementation("io.grpc:grpc-context:1.68.2")
+    implementation("io.grpc:grpc-api:1.68.2")
 }
+
