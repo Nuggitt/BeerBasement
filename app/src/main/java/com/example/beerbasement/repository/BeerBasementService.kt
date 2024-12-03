@@ -6,7 +6,8 @@ import retrofit2.http.DELETE
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import com.example.beerbasement.model.Beer
-
+import okhttp3.RequestBody
+import retrofit2.http.Headers
 
 
 interface BeerBasementService {
@@ -24,6 +25,10 @@ interface BeerBasementService {
 
     @PUT("beers/{id}")
     fun updateBeer(@Path("id") beerId: Int, @Body beer: Beer): Call<Beer>
+
+    @POST("https://vision.googleapis.com/v1/images:annotate?key=YOUR_API_KEY")
+    @Headers("Content-Type: application/json")
+    fun annotateImage(@Body request: RequestBody): Call<VisionApiResponse>
 
 
 

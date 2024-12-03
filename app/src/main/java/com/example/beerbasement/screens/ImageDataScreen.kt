@@ -20,9 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.google.api.gax.grpc.GrpcTransportChannel
+import com.google.api.gax.rpc.FixedTransportChannelProvider
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.cloud.vision.v1.*
 import com.google.protobuf.ByteString
+import io.grpc.ManagedChannelBuilder
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.util.Collections
@@ -46,7 +49,7 @@ fun ImageDataScreen(imageUri: Uri) {
                 callCloudVision(it, context) { recognizedText = it }
             }
         } catch (e: Exception) {
-            Toast.makeText(context, "Error processing image: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Error processing image: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -69,45 +72,67 @@ fun ImageDataScreen(imageUri: Uri) {
 }
 
 fun getVisionCredentialsFromAssets(context: Context): GoogleCredentials {
-    val inputStream: InputStream = context.assets.open("beerbasementproject-4cd09c30fd67.json")
-    return GoogleCredentials.fromStream(inputStream)
-        .createScoped(Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"))
+    val assetManager = context.assets
+    val inputStream = assetManager.open("beerbasementproject-aac8a3e0367d.json") // Your service account JSON file
+    return GoogleCredentials.fromStream(inputStream).createScoped(
+        listOf("https://www.googleapis.com/auth/cloud-platform")
+    )
 }
 
 fun callCloudVision(bitmap: Bitmap, context: Context, onTextRecognized: (String) -> Unit) {
     try {
-        // Get credentials from the assets (service account)
+        // Step 1: Get credentials from assets (service account key file)
         val credentials = getVisionCredentialsFromAssets(context)
 
-        // Initialize the Vision API client with credentials
+        // Step 2: Set up the gRPC transport channel
+        val channel = ManagedChannelBuilder.forAddress("vision.googleapis.com", 443)
+            .useTransportSecurity() // Enable secure communication
+            .build()
+
+        val transportChannel = GrpcTransportChannel.create(channel)
+
+        // Step 3: Set up ImageAnnotatorSettings with credentials and channel
         val imageAnnotatorSettings = ImageAnnotatorSettings.newBuilder()
             .setCredentialsProvider { credentials }
+            .setTransportChannelProvider(FixedTransportChannelProvider.create(transportChannel))
             .build()
 
+        // Step 4: Initialize the ImageAnnotatorClient
         val imageAnnotatorClient = ImageAnnotatorClient.create(imageAnnotatorSettings)
 
-        // Convert bitmap to base64
-        val base64Image = encodeBitmapToBase64(bitmap)
-
-        // Create the image request
-        val img = Image.newBuilder().setContent(ByteString.copyFrom(Base64.decode(base64Image, Base64.DEFAULT))).build()
-        val feature = Feature.newBuilder().setType(Feature.Type.TEXT_DETECTION).setMaxResults(5).build()
-        val request = AnnotateImageRequest.newBuilder()
-            .addFeatures(feature)
-            .setImage(img)
+        // Step 5: Prepare the image and request
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+        val image = Image.newBuilder()
+            .setContent(ByteString.copyFrom(stream.toByteArray()))
             .build()
 
-        // Call the Vision API
-        val response = imageAnnotatorClient.batchAnnotateImages(Collections.singletonList(request))
+        val feature = Feature.newBuilder()
+            .setType(Feature.Type.TEXT_DETECTION)
+            .setMaxResults(5)
+            .build()
 
-        // Handle the API response
+        val request = AnnotateImageRequest.newBuilder()
+            .addFeatures(feature)
+            .setImage(image)
+            .build()
+
+        // Step 6: Make the Vision API call
+        val response = imageAnnotatorClient.batchAnnotateImages(listOf(request))
+
+        // Step 7: Handle the API response
         handleVisionResponse(response, context, onTextRecognized)
+
+        // Step 8: Close the channel to free resources
+        imageAnnotatorClient.close()
+        channel.shutdownNow()
 
     } catch (e: Exception) {
         Log.e("ImageProcessingError", "Error processing image", e)
         Toast.makeText(context, "Error processing image: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
     }
 }
+
 
 fun handleVisionResponse(response: BatchAnnotateImagesResponse, context: Context, onTextRecognized: (String) -> Unit) {
     try {

@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.beerbasement"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.beerbasement"
@@ -27,6 +27,7 @@ android {
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
+
             )
         }
     }
@@ -53,6 +54,7 @@ android {
             excludes.add("META-INF/{AL2.0,LGPL2.1}")  // Exclude conflicting resources
             excludes.add("META-INF/DEPENDENCIES")     // Exclude the DEPENDENCIES file
             excludes.add("META-INF/INDEX.LIST")       // Exclude the INDEX.LIST file
+            excludes.add("META-INF/io.netty.versions.properties")
         }
     }
 }
@@ -74,6 +76,7 @@ dependencies {
     implementation(libs.firebase.common.ktx)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.animation.core.android)
+    implementation(libs.play.services.vision)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -85,6 +88,7 @@ dependencies {
     // Retrofit & Gson
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.10.0")
 
     // Jetpack Compose Material 3
     implementation("androidx.compose.material3:material3:1.3.1")
@@ -94,8 +98,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     // Mockito for testing
-    implementation("org.mockito:mockito-core:4.0.0")
-    implementation("org.mockito:mockito-inline:4.0.0")
+    implementation("org.mockito:mockito-core:5.14.2")
+    implementation("org.mockito:mockito-inline:5.2.0")
 
     // Lifecycle and Compose Integration
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
@@ -106,13 +110,14 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")  // Replace with actual version
 
     // Google Cloud Vision API
-    implementation("com.google.auth:google-auth-library-oauth2-http:1.17.0")
-    implementation("com.google.android.gms:play-services-vision:20.1.3")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.30.0")
+    implementation("com.google.protobuf:protobuf-java-util:4.29.0")
+
+    // If you are using Vision API, you might also need these
     implementation("com.google.cloud:google-cloud-vision:3.52.0")
-    implementation("com.google.protobuf:protobuf-java-util:3.25.5")
-
-
 
     // Other dependencies
     implementation("androidx.activity:activity-ktx:1.9.3")
+
+
 }
