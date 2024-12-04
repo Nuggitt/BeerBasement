@@ -4,7 +4,16 @@ import android.net.Uri
 
 sealed class NavRoutes(val route: String) {
     data object BeerList : NavRoutes("list")
-    data object BeerAdd : NavRoutes("add")
+    object BeerAdd : NavRoutes("beerAdd/{imageUri}/{recognizedLogos}/{recognizedText}/{recognizedLabels}") {
+        fun createRoute(
+            imageUri: String,
+            recognizedLogos: String,
+            recognizedText: String,
+            recognizedLabels: String
+        ): String {
+            return "beerAdd/$imageUri/$recognizedLogos/$recognizedText/$recognizedLabels"
+        }
+    }
     data object BeerDetails : NavRoutes("details")
     data object Login : NavRoutes("login")
     object ImageDataScreen : NavRoutes("imageData/{photoUri}") {

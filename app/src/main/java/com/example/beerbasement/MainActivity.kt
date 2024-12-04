@@ -165,7 +165,11 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
             if (photoUri != null) {
                 // Pass the parsed URI to ImageDataScreen
-                ImageDataScreen(imageUri = photoUri, signOut = { authenticationViewModel.signOut() })
+                ImageDataScreen(
+                    imageUri = photoUri,
+                    signOut = { authenticationViewModel.signOut() },
+                    navController = navController
+                )
             } else {
                 // Handle missing or invalid URI
                 Text(

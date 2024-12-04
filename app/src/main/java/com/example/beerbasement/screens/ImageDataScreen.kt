@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +34,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.beerbasement.NavRoutes
 import com.google.api.gax.grpc.GrpcTransportChannel
 import com.google.api.gax.rpc.FixedTransportChannelProvider
 import com.google.auth.oauth2.GoogleCredentials
@@ -51,7 +54,7 @@ import java.io.InputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ImageDataScreen(imageUri: Uri, signOut: () -> Unit) {
+fun ImageDataScreen(imageUri: Uri, signOut: () -> Unit, navController: NavController) {
     val context = LocalContext.current
     var recognizedLogos by remember { mutableStateOf("") }
     var recognizedText by remember { mutableStateOf("") }
@@ -195,9 +198,39 @@ fun ImageDataScreen(imageUri: Uri, signOut: () -> Unit) {
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                 }
+                Button(
+                    onClick = {
+                        // Navigate and pass the captured data
+                        navController.navigate(
+                            NavRoutes.BeerAdd.createRoute(
+                                imageUri.toString(),
+                                recognizedLogos,
+                                recognizedText,
+                                recognizedLabels
+                            )
+                        )
+                    }
+                ) {
+                    Text("Pass Data to Add Beer")
+                }
             }
         }
     )
+}
+
+fun autoFillFromImage(
+    logos: String,
+    text: String,
+    labels: String,
+    onAutoFillResult: (String, String, String) -> Unit
+) {
+    // Example auto-fill logic: You can add your custom conditions here
+    val filledLogos = if (logos.isNotEmpty()) logos else "No logos detected"
+    val filledText = if (text.isNotEmpty()) text else "No text detected"
+    val filledLabels = if (labels.isNotEmpty()) labels else "No labels detected"
+
+    // Callback to update UI after auto-filling the fields
+    onAutoFillResult(filledLogos, filledText, filledLabels)
 }
 
 /**
@@ -297,7 +330,20 @@ suspend fun callCloudVision(
 
             // Step 8: Handle the API response on the main thread
             withContext(Dispatchers.Main) {
-                handleVisionResponse(response, context, onResult)
+                // Get the logo, text, and label data from the response
+                val logoAnnotations = response.responsesList[0].logoAnnotationsList
+                val textAnnotations = response.responsesList[0].textAnnotationsList
+                val labelAnnotations = response.responsesList[0].labelAnnotationsList
+
+                // Prepare recognized data strings
+                val recognizedLogos = logoAnnotations.joinToString("\n") { "Logo: ${it.description}, Confidence: ${it.score}" }
+                val recognizedText = textAnnotations.joinToString("\n") { "Detected Text: ${it.description}" }
+                val recognizedLabels = labelAnnotations.joinToString("\n") { "Label: ${it.description}, Confidence: ${it.score}" }
+
+                // Use autoFillFromImage to fill the fields
+                autoFillFromImage(recognizedLogos, recognizedText, recognizedLabels) { logos, text, labels ->
+                    onResult(Triple(logos, text, labels))
+                }
             }
 
             // Step 9: Close the channel to free resources
@@ -306,10 +352,10 @@ suspend fun callCloudVision(
         }
     } catch (e: Exception) {
         Log.e("ImageProcessingError", "Error processing image", e)
-        Toast.makeText(context, "Error processing image: ${e.localizedMessage}", Toast.LENGTH_SHORT)
-            .show()
+        Toast.makeText(context, "Error processing image: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
     }
 }
+
 
 fun handleVisionResponse(
     response: BatchAnnotateImagesResponse,

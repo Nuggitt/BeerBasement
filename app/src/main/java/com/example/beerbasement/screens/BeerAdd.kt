@@ -61,12 +61,26 @@ fun BeerAdd(
     var imageUri by remember { mutableStateOf<Uri?>(null) }
 
 
-    // Inside your composable
+    // Simulate extracting data from an image
+    fun autoFillFromImage(uri: Uri) {
+        // Here, we'll simulate the "recognition" by setting predefined values
+        title = "Heineken Lager"  // Example auto-filled data from image
+        brewery = "Heineken"
+        style = "Lager"
+        abv = "5.0"
+        volume = "500ml"  // Add any other fields you'd like to auto-fill
+        howMany = "3"
+    }
+
+    // Take Picture Launcher
     val takePictureLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
             if (success) {
                 imageUri?.let { uri ->
+                    // After capturing the image, call the auto-fill function
+                    autoFillFromImage(uri)
+                    // Optionally navigate to a new screen
                     val encodedUri = Uri.encode(uri.toString())
                     navController.navigate(NavRoutes.ImageDataScreen.createRoute(encodedUri))
                 } ?: run {
@@ -100,18 +114,27 @@ fun BeerAdd(
                 .padding(innerPadding)
                 .padding(start = 16.dp, end = 16.dp)
         ) {
+            // Beer Name
             OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Beer Name") })
+            // Brewery
             OutlinedTextField(value = brewery, onValueChange = { brewery = it }, label = { Text("Brewery") })
+            // Style
             OutlinedTextField(value = style, onValueChange = { style = it }, label = { Text("Style") })
+            // ABV
             OutlinedTextField(value = abv, onValueChange = { abv = it }, label = { Text("ABV") })
+            // Volume
             OutlinedTextField(value = volume, onValueChange = { volume = it }, label = { Text("Volume") })
+            // Picture URL (for now, you can leave it empty or set it later)
             OutlinedTextField(value = pictureUrl, onValueChange = { pictureUrl = it }, label = { Text("Picture URL") })
+            // How Many
             OutlinedTextField(value = howMany, onValueChange = { howMany = it }, label = { Text("How Many") })
 
             Row(modifier = Modifier.fillMaxWidth()) {
+                // Back Button
                 Button(onClick = onNavigateBack, modifier = Modifier.weight(1f)) {
                     Text("Back")
                 }
+                // Add Beer Button
                 Button(onClick = {
                     addBeer(Beer(
                         user = currentUser,
@@ -128,6 +151,7 @@ fun BeerAdd(
                     Text("Add Beer")
                 }
 
+                // Take Picture Button
                 Button(onClick = {
                     val hasCameraPermission = ContextCompat.checkSelfPermission(
                         context, android.Manifest.permission.CAMERA
@@ -156,6 +180,5 @@ fun BeerAdd(
         }
     }
 }
-
 
 
