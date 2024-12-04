@@ -165,7 +165,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
             if (photoUri != null) {
                 // Pass the parsed URI to ImageDataScreen
-                ImageDataScreen(imageUri = photoUri)
+                ImageDataScreen(imageUri = photoUri, signOut = { authenticationViewModel.signOut() })
             } else {
                 // Handle missing or invalid URI
                 Text(
@@ -178,10 +178,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
     }
 }
 
-private fun startCameraIntent(context: Context) {
-    val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-    context.startActivity(cameraIntent)
-}
 
 @Preview(showBackground = true)
 @Composable

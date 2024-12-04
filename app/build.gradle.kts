@@ -96,7 +96,8 @@ dependencies {
 
     // Lifecycle and Compose Integration
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
-    implementation("androidx.compose.runtime:runtime-livedata:1.7.5") // observeAsState
+    implementation("androidx.compose.runtime:runtime-livedata:1.7.5")
+    implementation(libs.androidx.exifinterface) // observeAsState
 
     // Test dependencies
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")
