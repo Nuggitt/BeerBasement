@@ -60,26 +60,12 @@ fun BeerAdd(
     val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
 
-
-    // Simulate extracting data from an image
-    fun autoFillFromImage(uri: Uri) {
-        // Here, we'll simulate the "recognition" by setting predefined values
-        title = "Heineken Lager"  // Example auto-filled data from image
-        brewery = "Heineken"
-        style = "Lager"
-        abv = "5.0"
-        volume = "500ml"  // Add any other fields you'd like to auto-fill
-        howMany = "3"
-    }
-
     // Take Picture Launcher
     val takePictureLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
             if (success) {
                 imageUri?.let { uri ->
-                    // After capturing the image, call the auto-fill function
-                    autoFillFromImage(uri)
                     // Optionally navigate to a new screen
                     val encodedUri = Uri.encode(uri.toString())
                     navController.navigate(NavRoutes.ImageDataScreen.createRoute(encodedUri))
