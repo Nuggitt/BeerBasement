@@ -142,12 +142,21 @@ fun MainScreen(modifier: Modifier = Modifier) {
             )
         }
 
-        composable(NavRoutes.BeerAdd.route) {
+        composable(NavRoutes.BeerAdd.route) { backStackEntry ->
+            val imageUri = Uri.decode(backStackEntry.arguments?.getString("imageUri") ?: "")
+            val recognizedLogos = Uri.decode(backStackEntry.arguments?.getString("recognizedLogos") ?: "")
+            val recognizedText = Uri.decode(backStackEntry.arguments?.getString("recognizedText") ?: "")
+            val recognizedLabels = Uri.decode(backStackEntry.arguments?.getString("recognizedLabels") ?: "")
+
             BeerAdd(
                 modifier = Modifier,
                 onNavigateBack = { navController.popBackStack() },
                 addBeer = { beer -> viewModel.addBeer(beer) },
-                navController = navController
+                navController = navController,
+                imageUri = imageUri,
+                recognizedLogos = recognizedLogos,
+                recognizedText = recognizedText,
+                recognizedLabels = recognizedLabels
             )
         }
 

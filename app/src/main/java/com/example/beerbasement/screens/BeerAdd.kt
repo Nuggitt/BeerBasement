@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.*
@@ -46,26 +47,47 @@ fun BeerAdd(
     onNavigateBack: () -> Unit = {},
     addBeer: (Beer) -> Unit = {},
     signOut: () -> Unit = { FirebaseAuth.getInstance().signOut() },
-    navController: NavController
+    navController: NavController,
+    imageUri: String, // Updated to String
+    recognizedLogos: String,
+    recognizedText: String,
+    recognizedLabels: String
 ) {
     var title by rememberSaveable { mutableStateOf("") }
     var brewery by rememberSaveable { mutableStateOf("") }
     var style by rememberSaveable { mutableStateOf("") }
     var abv by rememberSaveable { mutableStateOf("") }
     var volume by rememberSaveable { mutableStateOf("") }
-    var pictureUrl by rememberSaveable { mutableStateOf("") }
+    var pictureUrl by rememberSaveable { mutableStateOf(imageUri) } // Pass picture URI here
     var howMany by rememberSaveable { mutableStateOf("") }
     val firebaseAuth = FirebaseAuth.getInstance()
     val currentUser = firebaseAuth.currentUser?.email ?: "Unknown"
     val context = LocalContext.current
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var imageUriLocal by remember { mutableStateOf<Uri?>(null) }
+
+    // Autofill fields based on recognized data
+    LaunchedEffect(recognizedLogos, recognizedText, recognizedLabels) {
+        if (recognizedLogos.isNotEmpty()) {
+            brewery = recognizedLogos // Assuming the recognized logos can provide the brewery name
+        }
+        if (recognizedText.isNotEmpty()) {
+            title = recognizedText // Assuming recognized text contains the beer title
+        }
+        if (recognizedLabels.isNotEmpty()) {
+            // You may want to match certain labels to style and ABV
+            // Here we simply set the first label to style and ABV for simplicity
+            val labels = recognizedLabels.split(",")
+            style = labels.getOrNull(0) ?: ""
+            abv = labels.getOrNull(1) ?: ""
+        }
+    }
 
     // Take Picture Launcher
     val takePictureLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
             if (success) {
-                imageUri?.let { uri ->
+                imageUriLocal?.let { uri ->
                     // Optionally navigate to a new screen
                     val encodedUri = Uri.encode(uri.toString())
                     navController.navigate(NavRoutes.ImageDataScreen.createRoute(encodedUri))
@@ -95,76 +117,144 @@ fun BeerAdd(
             )
         }
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = modifier
                 .padding(innerPadding)
                 .padding(start = 16.dp, end = 16.dp)
+                .fillMaxSize(), // Ensures the LazyColumn takes up full available space
+            contentPadding = PaddingValues(bottom = 16.dp) // Adds some bottom padding for the content
         ) {
             // Beer Name
-            OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Beer Name") })
+            item {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Beer Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             // Brewery
-            OutlinedTextField(value = brewery, onValueChange = { brewery = it }, label = { Text("Brewery") })
+            item {
+                OutlinedTextField(
+                    value = brewery,
+                    onValueChange = { brewery = it },
+                    label = { Text("Brewery") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             // Style
-            OutlinedTextField(value = style, onValueChange = { style = it }, label = { Text("Style") })
+            item {
+                OutlinedTextField(
+                    value = style,
+                    onValueChange = { style = it },
+                    label = { Text("Style") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             // ABV
-            OutlinedTextField(value = abv, onValueChange = { abv = it }, label = { Text("ABV") })
+            item {
+                OutlinedTextField(
+                    value = abv,
+                    onValueChange = { abv = it },
+                    label = { Text("ABV") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             // Volume
-            OutlinedTextField(value = volume, onValueChange = { volume = it }, label = { Text("Volume") })
+            item {
+                OutlinedTextField(
+                    value = volume,
+                    onValueChange = { volume = it },
+                    label = { Text("Volume") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             // Picture URL (for now, you can leave it empty or set it later)
-            OutlinedTextField(value = pictureUrl, onValueChange = { pictureUrl = it }, label = { Text("Picture URL") })
+            item {
+                OutlinedTextField(
+                    value = pictureUrl,
+                    onValueChange = { pictureUrl = it },
+                    label = { Text("Picture URL") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             // How Many
-            OutlinedTextField(value = howMany, onValueChange = { howMany = it }, label = { Text("How Many") })
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                // Back Button
-                Button(onClick = onNavigateBack, modifier = Modifier.weight(1f)) {
-                    Text("Back")
-                }
-                // Add Beer Button
-                Button(onClick = {
-                    addBeer(Beer(
-                        user = currentUser,
-                        brewery = brewery,
-                        name = title,
-                        style = style,
-                        abv = abv.toFloatOrNull() ?: 0f,
-                        volume = volume.toFloatOrNull() ?: 0f,
-                        pictureUrl = pictureUrl,
-                        howMany = howMany.toIntOrNull() ?: 0
-                    ))
-                    onNavigateBack()
-                }, modifier = Modifier.weight(1f)) {
-                    Text("Add Beer")
-                }
-
-                // Take Picture Button
-                Button(onClick = {
-                    val hasCameraPermission = ContextCompat.checkSelfPermission(
-                        context, android.Manifest.permission.CAMERA
-                    ) == PackageManager.PERMISSION_GRANTED
-
-                    if (!hasCameraPermission) {
-                        ActivityCompat.requestPermissions(
-                            context as Activity,
-                            arrayOf(android.Manifest.permission.CAMERA),
-                            CAMERA_PERMISSION_REQUEST_CODE
-                        )
-                    } else {
-                        // Proceed to take a picture
-                        val uri = createImageFile(context)
-                        if (uri != null) {
-                            imageUri = uri
-                            takePictureLauncher.launch(uri)
-                        } else {
-                            Toast.makeText(context, "Failed to create image file.", Toast.LENGTH_SHORT).show()
-                        }
+            item {
+                OutlinedTextField(
+                    value = howMany,
+                    onValueChange = { howMany = it },
+                    label = { Text("How Many") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            // Buttons Row
+            item {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    // Back Button
+                    Button(
+                        onClick = onNavigateBack,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Back")
                     }
-                }) {
-                    Text("Take Picture")
+                    // Add Beer Button
+                    Button(
+                        onClick = {
+                            // Add beer logic
+                            addBeer(
+                                Beer(
+                                    user = currentUser,
+                                    brewery = brewery,
+                                    name = title,
+                                    style = style,
+                                    abv = abv.toFloatOrNull() ?: 0f,
+                                    volume = volume.toFloatOrNull() ?: 0f,
+                                    pictureUrl = pictureUrl,
+                                    howMany = howMany.toIntOrNull() ?: 0
+                                )
+                            )
+                            // Navigate to Beer List Screen after adding the beer
+                            navController.navigate(NavRoutes.BeerList.route)
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Add Beer")
+                    }
+                    // Take Picture Button
+                    Button(
+                        onClick = {
+                            val hasCameraPermission = ContextCompat.checkSelfPermission(
+                                context, android.Manifest.permission.CAMERA
+                            ) == PackageManager.PERMISSION_GRANTED
+
+                            if (!hasCameraPermission) {
+                                ActivityCompat.requestPermissions(
+                                    context as Activity,
+                                    arrayOf(android.Manifest.permission.CAMERA),
+                                    CAMERA_PERMISSION_REQUEST_CODE
+                                )
+                            } else {
+                                // Proceed to take a picture
+                                val uri = createImageFile(context)
+                                if (uri != null) {
+                                    imageUriLocal = uri
+                                    takePictureLauncher.launch(uri)
+                                } else {
+                                    Toast.makeText(context, "Failed to create image file.", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Take Picture")
+                    }
                 }
             }
         }
     }
 }
+
+
+
 
 

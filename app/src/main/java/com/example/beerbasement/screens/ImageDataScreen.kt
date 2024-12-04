@@ -200,13 +200,19 @@ fun ImageDataScreen(imageUri: Uri, signOut: () -> Unit, navController: NavContro
                 }
                 Button(
                     onClick = {
-                        // Navigate and pass the captured data
+                        // Encode the parameters before navigating
+                        val encodedImageUri = Uri.encode(imageUri.toString())
+                        val encodedRecognizedLogos = Uri.encode(recognizedLogos)
+                        val encodedRecognizedText = Uri.encode(recognizedText)
+                        val encodedRecognizedLabels = Uri.encode(recognizedLabels)
+
+                        // Navigate and pass the encoded data
                         navController.navigate(
                             NavRoutes.BeerAdd.createRoute(
-                                imageUri.toString(),
-                                recognizedLogos,
-                                recognizedText,
-                                recognizedLabels
+                                encodedImageUri,
+                                encodedRecognizedLogos,
+                                encodedRecognizedText,
+                                encodedRecognizedLabels
                             )
                         )
                     }
@@ -262,7 +268,7 @@ fun correctBitmapOrientation(context: Context, uri: Uri, bitmap: Bitmap?): Bitma
 fun getVisionCredentialsFromAssets(context: Context): GoogleCredentials {
     val assetManager = context.assets
     val inputStream =
-        assetManager.open("beerbasementproject-d7f15e4ed609.json") // Your service account JSON file
+        assetManager.open("beerbasementproject-7cdef671bd19.json") // Your service account JSON file
     return GoogleCredentials.fromStream(inputStream).createScoped(
         listOf("https://www.googleapis.com/auth/cloud-platform")
     )
@@ -356,53 +362,3 @@ suspend fun callCloudVision(
     }
 }
 
-
-fun handleVisionResponse(
-    response: BatchAnnotateImagesResponse,
-    context: Context,
-    onResult: (Triple<String, String, String>) -> Unit
-) {
-    try {
-        Log.d("VisionResponse", "Response: ${response.toString()}")
-
-        // Get the logo annotations from the response
-        val logoAnnotations = response.responsesList[0].logoAnnotationsList
-        val textAnnotations = response.responsesList[0].textAnnotationsList
-        val labelAnnotations = response.responsesList[0].labelAnnotationsList
-
-        // Prepare StringBuilder to store recognized logos, text, and labels
-        val recognizedLogos = StringBuilder()
-        val recognizedText = StringBuilder()
-        val recognizedLabels = StringBuilder()
-
-        // Extract logo information
-        for (annotation in logoAnnotations) {
-            recognizedLogos.append("Logo: ${annotation.description}, Confidence: ${annotation.score}\n")
-        }
-
-        // Extract text information (if any)
-        for (annotation in textAnnotations) {
-            recognizedText.append("Detected Text: ${annotation.description}\n")
-        }
-
-        // Extract label information (if any)
-        for (annotation in labelAnnotations) {
-            recognizedLabels.append("Label: ${annotation.description}, Confidence: ${annotation.score}\n")
-        }
-
-        // Return the combined result to the UI
-        onResult(
-            Triple(
-                recognizedLogos.toString(),
-                recognizedText.toString(),
-                recognizedLabels.toString()
-            )
-        )
-    } catch (e: Exception) {
-        Toast.makeText(
-            context,
-            "Error processing API response: ${e.localizedMessage}",
-            Toast.LENGTH_LONG
-        ).show()
-    }
-}
