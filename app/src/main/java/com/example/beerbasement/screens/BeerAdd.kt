@@ -79,6 +79,7 @@ fun BeerAdd(
             .map { it.trim() }
             .any { label -> drinkKeywords.any { label.contains(it, ignoreCase = true) } }
 
+
         // Only proceed with autofill if it's a drink
         if (isDrink) {
             // Filter brewery
