@@ -8,6 +8,7 @@ import retrofit2.http.PUT
 import com.example.beerbasement.model.Beer
 import okhttp3.RequestBody
 import retrofit2.http.Headers
+import retrofit2.http.Query
 
 
 interface BeerBasementService {
@@ -25,6 +26,9 @@ interface BeerBasementService {
 
     @PUT("beers/{id}")
     fun updateBeer(@Path("id") beerId: Int, @Body beer: Beer): Call<Beer>
+
+
+
 
 
 
