@@ -110,10 +110,10 @@ dependencies {
     // Other dependencies
     implementation("androidx.activity:activity-ktx:1.9.3")
 
-    // gRPC dependencies
+
     implementation("io.grpc:grpc-core:1.68.2")
-    implementation("io.grpc:grpc-okhttp:1.68.2") // Ensure this is included
-    implementation("io.grpc:grpc-netty-shaded:1.68.2") // Ensure this is included
+    implementation("io.grpc:grpc-okhttp:1.68.2")
+    implementation("io.grpc:grpc-netty-shaded:1.68.2")
     implementation("io.grpc:grpc-protobuf:1.68.2")
     implementation("io.grpc:grpc-stub:1.68.2")
     implementation("io.grpc:grpc-context:1.68.2")

@@ -105,7 +105,7 @@ fun BeerAdd(
                 val cleanedText = recognizedText.replace(Regex("[^\\x00-\\x7F]+"), "")
 
                 // ABV Pattern: Matches values like "5%", "ABV 5.0%", "ALK 4.6", etc.
-                val abvPattern = Regex("(?:ABV|ALK\\.|VOL)[\\s:]*([\\d]{1,2}[.,]?[\\d]{0,2})\\s?%?")
+                val abvPattern = Regex("(?:ABV|ALC\\.|ALK\\.|VOL)[\\s:]*([\\d]{1,2}[.,]?[\\d]{0,2})\\s?%?")
 
                 // Log the cleaned recognized text for debugging
                 Log.d("ABV Debug", "Cleaned Recognized Text: $cleanedText")
@@ -135,7 +135,7 @@ fun BeerAdd(
                 val knownBeerTitles = listOf(
                     "Classic", "Nordic", "Red", "Gold", "Light", "Dark", "Amber", "Blonde", "Black", "Strong",
                     "Ice", "Premium", "Special", "Crisp", "Bitter", "Rich", "Sweet", "Smoked", "Golden",
-                    "Ruby", "Draft", "Belgian", "American", "Wheat", "Pilsner", "IPA", "Craft", "Hazy", "Lager", "Ale"
+                    "Ruby", "Draft", "Belgian", "American", "Wheat", "Pilsner", "IPA", "Craft", "Hazy", "Lager", "Ale", "Brown Ale"
                 )
                 title = knownBeerTitles.find { it -> recognizedText.contains(it, ignoreCase = true) } ?: recognizedText
 
@@ -147,8 +147,6 @@ fun BeerAdd(
             }
         }
     }
-
-
 
     // Take Picture Launcher
     val takePictureLauncher = rememberLauncherForActivityResult(
