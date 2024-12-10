@@ -3,6 +3,7 @@ package com.example.beerbasement.screens
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
+import java.io.FileNotFoundException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,8 +33,20 @@ fun ImageLabelingScreen(savedUri: Uri) {
         try {
             val inputStream = context.contentResolver.openInputStream(savedUri)
             BitmapFactory.decodeStream(inputStream)
+        } catch (e: FileNotFoundException) {
+            Log.e("ImageLabeling", "File not found for URI: $savedUri")
+
+            Toast.makeText(context, "Image file not found. Please select a valid image.", Toast.LENGTH_LONG).show()
+            null
+        } catch (e: SecurityException) {
+            Log.e("ImageLabeling", "Permission denied for URI: $savedUri")
+
+            Toast.makeText(context, "Permission denied. Please allow access to images.", Toast.LENGTH_LONG).show()
+            null
         } catch (e: Exception) {
-            Log.e("ImageLabeling", "Error loading bitmap: ${e.message}")
+            Log.e("ImageLabeling", "Unexpected error loading bitmap: ${e.message}")
+
+            Toast.makeText(context, "An unexpected error occurred. Please try again.", Toast.LENGTH_LONG).show()
             null
         }
     }
