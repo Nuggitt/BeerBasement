@@ -290,6 +290,8 @@ suspend fun callCloudVision(
                 .useTransportSecurity() // Enable secure communication
                 .build()
 
+
+
             val transportChannel = GrpcTransportChannel.create(channel)
 
             // Step 3: Set up ImageAnnotatorSettings with credentials and channel
