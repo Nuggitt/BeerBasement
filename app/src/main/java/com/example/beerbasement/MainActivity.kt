@@ -1,19 +1,19 @@
 package com.example.beerbasement
 
-import android.content.res.Configuration
+import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -25,24 +25,38 @@ import com.example.beerbasement.model.Beer
 import com.example.beerbasement.model.BeersViewModelState
 import com.example.beerbasement.screens.Authentication
 import com.example.beerbasement.screens.BeerAdd
-import com.example.beerbasement.screens.BeerList
 import com.example.beerbasement.screens.BeerDetails
+import com.example.beerbasement.screens.BeerList
 import com.example.beerbasement.ui.theme.BeerBasementTheme
 
 class MainActivity : ComponentActivity() {
+    private lateinit var takePictureLauncher: ActivityResultLauncher<Intent>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        takePictureLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val imageBitmap = result.data?.extras?.get("data") as Bitmap?
+                imageBitmap?.let {
+                    // Handle the captured image
+                }
+            } else {
+                Toast.makeText(this, "Image capture failed", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         setContent {
             BeerBasementTheme {
-                MainScreen()
+                MainScreen(takePictureLauncher)
             }
         }
     }
 }
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
+fun MainScreen(takePictureLauncher: ActivityResultLauncher<Intent>, modifier: Modifier = Modifier) {
     val viewModel: BeersViewModelState = viewModel()
     val navController = rememberNavController()
     val authenticationViewModel: AuthenticationViewModel = viewModel()
@@ -73,8 +87,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 }
             }
             BeerList(
-                modifier = modifier
-                    .fillMaxSize(),
+                modifier = modifier.fillMaxSize(),
                 beers = beers,
                 errorMessage = errorMessage,
                 onBeerSelected = { beer -> navController.navigate(NavRoutes.BeerDetails.route + "/${beer.id}") },
@@ -94,8 +107,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 sortByVolume = { viewModel.sortBeersByVolume(ascending = it) },
                 filterByTitle = { viewModel.filterByTitle(it) },
                 navigateToUrlSite = { url -> viewModel.navigateToUrlSite(context, url) }
-
-
             )
         }
         composable(
@@ -129,24 +140,19 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     )
                 },
                 navigateToUrlSite = { url -> viewModel.navigateToUrlSite(context, url) }
-
             )
         }
         composable(NavRoutes.BeerAdd.route) {
             BeerAdd(
                 modifier = modifier,
+                takePictureLauncher = takePictureLauncher,
                 onNavigateBack = { navController.popBackStack() },
                 addBeer = { beer -> viewModel.addBeer(beer) },
+                signOut = {
+                    authenticationViewModel.signOut()
+                    viewModel.clearBeers() // Clear beers on sign out
+                }
             )
         }
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    BeerBasementTheme {
-        MainScreen()
     }
 }

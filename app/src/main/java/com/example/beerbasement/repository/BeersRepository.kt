@@ -8,14 +8,16 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.example.beerbasement.model.Beer
+import com.example.beerbasement.model.TensorFlowModel
 import com.google.firebase.auth.FirebaseAuth
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.nio.ByteBuffer
 
-class BeersRepository {
+class BeersRepository() {
     private val baseUrl = "https://anbo-restbeer.azurewebsites.net/api/"
     private val beerBasementService: BeerBasementService
     val beersFlow: MutableState<List<Beer>> = mutableStateOf(listOf())
@@ -24,6 +26,8 @@ class BeersRepository {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val currentUser = auth.currentUser?.email
     private var originalBeerList: List<Beer> = listOf() // Store the original list
+    private var tensorFlowModel = TensorFlowModel()
+
 
     init {
         val build: Retrofit = Retrofit.Builder()
@@ -32,6 +36,10 @@ class BeersRepository {
             .build()
         beerBasementService = build.create(BeerBasementService::class.java)
         getBeers()
+    }
+
+    fun getBeerStylePrediction(inputData: ByteBuffer): String {
+        return tensorFlowModel.predictBeerStyle(inputData)
     }
 
     fun getBeers() {
@@ -207,6 +215,10 @@ class BeersRepository {
         val uri = Uri.parse(url)
         val intent = Intent(Intent.ACTION_VIEW, uri)
         context.startActivity(intent)
+    }
+
+    fun close() {
+        tensorFlowModel.close()
     }
 
 

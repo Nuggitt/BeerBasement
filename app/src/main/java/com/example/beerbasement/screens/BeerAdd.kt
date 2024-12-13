@@ -1,13 +1,23 @@
 package com.example.beerbasement.screens
-import android.content.res.Configuration
-import androidx.compose.foundation.layout.Box
+
+import android.Manifest
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.net.Uri
+import android.provider.MediaStore
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.Button
@@ -21,16 +31,19 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import coil.compose.rememberAsyncImagePainter
 import com.example.beerbasement.model.Beer
-import com.example.beerbasement.ui.theme.BeerBasementTheme
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,6 +53,7 @@ fun BeerAdd(
     onNavigateBack: () -> Unit = {},
     addBeer: (Beer) -> Unit = {},
     signOut: () -> Unit = { FirebaseAuth.getInstance().signOut() },
+    takePictureLauncher: ActivityResultLauncher<Intent>
 ) {
     var title by rememberSaveable { mutableStateOf("") }
     var brewery by rememberSaveable { mutableStateOf("") }
@@ -48,9 +62,30 @@ fun BeerAdd(
     var volume by rememberSaveable { mutableStateOf("") }
     var pictureUrl by rememberSaveable { mutableStateOf("") }
     var howMany by rememberSaveable { mutableStateOf("") }
+    var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     val firebaseAuth = FirebaseAuth.getInstance()
     val currentUser = firebaseAuth.currentUser?.email ?: "Unknown"
-    val orientation = LocalConfiguration.current.orientation
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                context as ComponentActivity,
+                arrayOf(Manifest.permission.CAMERA),
+                1
+            )
+        }
+    }
+
+    fun dispatchTakePictureIntent() {
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        try {
+            takePictureLauncher.launch(takePictureIntent)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(context, "No camera app found", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -69,168 +104,78 @@ fun BeerAdd(
             )
         }
     ) { innerPadding ->
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            // Portrait Mode
-            Column(
-                modifier = modifier
-                    .padding(innerPadding)
-                    .padding(start = 16.dp, end = 16.dp)
-            ) {
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Beer Name") })
-                OutlinedTextField(
-                    value = brewery,
-                    onValueChange = { brewery = it },
-                    label = { Text("Brewery") })
-                OutlinedTextField(
-                    value = style,
-                    onValueChange = { style = it },
-                    label = { Text("Style") })
-                OutlinedTextField(
-                    value = abv,
-                    onValueChange = { abv = it },
-                    label = { Text("ABV") })
-                OutlinedTextField(
-                    value = volume,
-                    onValueChange = { volume = it },
-                    label = { Text("Volume") })
-                OutlinedTextField(
-                    value = pictureUrl,
-                    onValueChange = { pictureUrl = it },
-                    label = { Text("Picture URL") })
-                OutlinedTextField(
-                    value = howMany,
-                    onValueChange = { howMany = it },
-                    label = { Text("How Many") })
+        Column(
+            modifier = modifier
+                .padding(innerPadding)
+                .padding(start = 16.dp, end = 16.dp)
+        ) {
+            OutlinedTextField(
+                value = title,
+                onValueChange = { title = it },
+                label = { Text("Beer Name") })
+            OutlinedTextField(
+                value = brewery,
+                onValueChange = { brewery = it },
+                label = { Text("Brewery") })
+            OutlinedTextField(
+                value = style,
+                onValueChange = { style = it },
+                label = { Text("Style") })
+            OutlinedTextField(
+                value = abv,
+                onValueChange = { abv = it },
+                label = { Text("ABV") })
+            OutlinedTextField(
+                value = volume,
+                onValueChange = { volume = it },
+                label = { Text("Volume") })
+            OutlinedTextField(
+                value = pictureUrl,
+                onValueChange = { pictureUrl = it },
+                label = { Text("Picture URL") })
+            OutlinedTextField(
+                value = howMany,
+                onValueChange = { howMany = it },
+                label = { Text("How Many") })
 
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Button(onClick = onNavigateBack, modifier = Modifier.weight(1f)) {
-                        Text("Back")
-                    }
-                    Button(
-                        onClick = {
+            imageUri?.let {
+                val image: Painter = rememberAsyncImagePainter(model = it)
+                Image(painter = image, contentDescription = null, modifier = Modifier.fillMaxWidth().height(200.dp))
+            }
+
+            Button(onClick = { dispatchTakePictureIntent() }) {
+                Text("Capture Image")
+            }
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Button(onClick = onNavigateBack, modifier = Modifier.weight(1f)) {
+                    Text("Back")
+                }
+                Button(
+                    onClick = {
+                        try {
                             addBeer(
                                 Beer(
                                     user = currentUser,
                                     brewery = brewery,
                                     name = title,
                                     style = style,
-                                    abv = abv.toFloat(),
-                                    volume = volume.toFloat(),
+                                    abv = abv.toFloatOrNull() ?: 0f,
+                                    volume = volume.toFloatOrNull() ?: 0f,
                                     pictureUrl = pictureUrl,
-                                    howMany = howMany.toInt()
+                                    howMany = howMany.toIntOrNull() ?: 0
                                 )
                             )
                             onNavigateBack()
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Add Beer")
-                    }
-                }
-            }
-        } else {
-            // Landscape Mode
-            Box(modifier = modifier
-                .fillMaxSize()
-                .padding(innerPadding)) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    item {
-                        OutlinedTextField(
-                            value = title,
-                            onValueChange = { title = it },
-                            label = { Text("Beer Name") })
-                    }
-                    item {
-                        OutlinedTextField(
-                            value = brewery,
-                            onValueChange = { brewery = it },
-                            label = { Text("Brewery") })
-                    }
-                    item {
-                        OutlinedTextField(
-                            value = style,
-                            onValueChange = { style = it },
-                            label = { Text("Style") })
-                    }
-                    item {
-                        OutlinedTextField(
-                            value = abv,
-                            onValueChange = { abv = it },
-                            label = { Text("ABV") })
-                    }
-                    item {
-                        OutlinedTextField(
-                            value = volume,
-                            onValueChange = { volume = it },
-                            label = { Text("Volume") })
-                    }
-                    item {
-                        OutlinedTextField(
-                            value = pictureUrl,
-                            onValueChange = { pictureUrl = it },
-                            label = { Text("Picture URL") })
-                    }
-                    item {
-                        OutlinedTextField(
-                            value = howMany,
-                            onValueChange = { howMany = it },
-                            label = { Text("How Many") })
-                    }
-                    item {
-                        Row {
-                            Button(onClick = onNavigateBack, modifier = Modifier.weight(1f)) {
-                                Text("Back")
-                            }
-                            Button(
-                                onClick = {
-                                    addBeer(
-                                        Beer(
-                                            user = currentUser,
-                                            brewery = brewery,
-                                            name = title,
-                                            style = style,
-                                            abv = abv.toFloat(),
-                                            volume = volume.toFloat(),
-                                            pictureUrl = pictureUrl,
-                                            howMany = howMany.toInt()
-                                        )
-                                    )
-                                    onNavigateBack()
-                                },
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text("Add Beer")
-                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Error adding beer: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
-                    }
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Add Beer")
                 }
             }
         }
     }
 }
-
-@Preview(showBackground = true, name = "BeerAdd Preview")
-@Composable
-fun BeerAddPreview() {
-    BeerBasementTheme {
-        BeerAdd(
-            modifier = Modifier,
-            onNavigateBack = {},
-            addBeer = {},
-            signOut = {}
-        )
-    }
-}
-
-
-
-
-
