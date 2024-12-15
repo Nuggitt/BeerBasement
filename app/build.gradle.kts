@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.beerbasement"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.beerbasement"
@@ -74,30 +74,30 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // Retrofit & Gson
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 
     // Jetpack Compose Material 3
-    implementation("androidx.compose.material3:material3:1.3.1")
-    implementation("androidx.compose.material:material-icons-extended:1.7.5")
+    implementation(libs.material3)
+    implementation(libs.androidx.material.icons.extended)
     
 
     // Coil for image loading
-    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation(libs.coil.compose)
 
     // Mockito for testing
-    implementation("org.mockito:mockito-core:4.0.0")
-    implementation("org.mockito:mockito-inline:4.0.0")
+    implementation(libs.mockito.core)
+    implementation(libs.mockito.inline)
 
     // Lifecycle and Compose Integration
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
-    implementation("androidx.compose.runtime:runtime-livedata:1.7.5") // observeAsState
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.runtime.livedata) // observeAsState
 
     // Test dependencies
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")  // Replace with actual version
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")  // Replace with actual version
+    androidTestImplementation(libs.ui.test.junit4)  // Replace with actual version
+    debugImplementation(libs.ui.test.manifest)  // Replace with actual version
 
-    implementation ("org.tensorflow:tensorflow-lite:2.16.1")
-    implementation ("org.tensorflow:tensorflow-lite-support:0.4.4")
+    implementation (libs.tensorflow.lite)
+    implementation (libs.tensorflow.lite.support)
 
 }
