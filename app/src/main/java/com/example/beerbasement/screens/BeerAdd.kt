@@ -98,6 +98,12 @@ fun BeerAdd(
                     ""
                 )
                 imageUri = Uri.parse(imageUriString)
+
+                // Automatically navigate to Image Data Screen after accepting the picture
+                imageUri?.let { uri ->
+                    val encodedUri = Uri.encode(uri.toString())
+                    navController.navigate("${NavRoutes.ImageDataScreen.route}/$encodedUri")
+                }
             }
         } else {
             Toast.makeText(context, "Image capture failed", Toast.LENGTH_SHORT).show()
@@ -164,8 +170,6 @@ fun BeerAdd(
                 onValueChange = { howMany = it },
                 label = { Text("How Many") })
 
-
-
             Row(modifier = Modifier.fillMaxWidth()) {
                 Button(onClick = onNavigateBack, modifier = Modifier.weight(1f)) {
                     Text("Back")
@@ -202,27 +206,8 @@ fun BeerAdd(
             Button(onClick = { dispatchTakePictureIntent() }, modifier = Modifier.padding().fillMaxWidth()) {
                 Text("Capture Image")
             }
-            imageUri?.let {
-                val image: Painter = rememberAsyncImagePainter(model = it)
-                Image(
-                    painter = image,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                )
-                Button(
-                    onClick = {
-                        // Navigate to ImageDataScreen with the encoded imageUri
-                        val encodedUri = Uri.encode(it.toString())
-                        navController.navigate("${NavRoutes.ImageDataScreen.route}/$encodedUri")
-                    },
-                    modifier = Modifier.padding(top = 8.dp).fillMaxWidth()
-                ) {
-                    Text("Navigate to Image Data Screen")
-                }
-            }
         }
     }
 }
+
 
