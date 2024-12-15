@@ -3,6 +3,7 @@ package com.example.beerbasement.repository
 import BeerBasementService
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.MutableState
@@ -38,7 +39,7 @@ class BeersRepository() {
         getBeers()
     }
 
-    fun getBeerStylePrediction(inputData: ByteBuffer): String {
+    fun getBeerStylePrediction(inputData: Bitmap): String {
         return tensorFlowModel.predictBeerStyle(inputData)
     }
 
