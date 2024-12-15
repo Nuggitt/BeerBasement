@@ -9,6 +9,7 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -34,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -42,7 +44,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.beerbasement.NavRoutes
 import com.example.beerbasement.model.Beer
 import com.google.firebase.auth.FirebaseAuth
 
@@ -53,7 +57,7 @@ fun BeerAdd(
     onNavigateBack: () -> Unit = {},
     addBeer: (Beer) -> Unit = {},
     signOut: () -> Unit = { FirebaseAuth.getInstance().signOut() },
-    takePictureLauncher: ActivityResultLauncher<Intent>
+    navController: NavController
 ) {
     var title by rememberSaveable { mutableStateOf("") }
     var brewery by rememberSaveable { mutableStateOf("") }
@@ -67,14 +71,36 @@ fun BeerAdd(
     val currentUser = firebaseAuth.currentUser?.email ?: "Unknown"
     val context = LocalContext.current
 
+    // Request camera permissions
     LaunchedEffect(Unit) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
-            != PackageManager.PERMISSION_GRANTED) {
+            != PackageManager.PERMISSION_GRANTED
+        ) {
             ActivityCompat.requestPermissions(
                 context as ComponentActivity,
                 arrayOf(Manifest.permission.CAMERA),
                 1
             )
+        }
+    }
+
+    // Camera intent launcher
+    val takePictureLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val imageBitmap = result.data?.extras?.get("data") as Bitmap?
+            imageBitmap?.let {
+                val imageUriString = MediaStore.Images.Media.insertImage(
+                    context.contentResolver,
+                    it,
+                    "Beer Image",
+                    ""
+                )
+                imageUri = Uri.parse(imageUriString)
+            }
+        } else {
+            Toast.makeText(context, "Image capture failed", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -138,14 +164,7 @@ fun BeerAdd(
                 onValueChange = { howMany = it },
                 label = { Text("How Many") })
 
-            imageUri?.let {
-                val image: Painter = rememberAsyncImagePainter(model = it)
-                Image(painter = image, contentDescription = null, modifier = Modifier.fillMaxWidth().height(200.dp))
-            }
 
-            Button(onClick = { dispatchTakePictureIntent() }) {
-                Text("Capture Image")
-            }
 
             Row(modifier = Modifier.fillMaxWidth()) {
                 Button(onClick = onNavigateBack, modifier = Modifier.weight(1f)) {
@@ -168,7 +187,11 @@ fun BeerAdd(
                             )
                             onNavigateBack()
                         } catch (e: Exception) {
-                            Toast.makeText(context, "Error adding beer: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                "Error adding beer: ${e.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     },
                     modifier = Modifier.weight(1f)
@@ -176,6 +199,30 @@ fun BeerAdd(
                     Text("Add Beer")
                 }
             }
+            Button(onClick = { dispatchTakePictureIntent() }, modifier = Modifier.padding().fillMaxWidth()) {
+                Text("Capture Image")
+            }
+            imageUri?.let {
+                val image: Painter = rememberAsyncImagePainter(model = it)
+                Image(
+                    painter = image,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                )
+                Button(
+                    onClick = {
+                        // Navigate to ImageDataScreen with the encoded imageUri
+                        val encodedUri = Uri.encode(it.toString())
+                        navController.navigate("${NavRoutes.ImageDataScreen.route}/$encodedUri")
+                    },
+                    modifier = Modifier.padding(top = 8.dp).fillMaxWidth()
+                ) {
+                    Text("Navigate to Image Data Screen")
+                }
+            }
         }
     }
 }
+

@@ -27,6 +27,7 @@ import com.example.beerbasement.screens.Authentication
 import com.example.beerbasement.screens.BeerAdd
 import com.example.beerbasement.screens.BeerDetails
 import com.example.beerbasement.screens.BeerList
+import com.example.beerbasement.screens.ImageDataScreen
 import com.example.beerbasement.ui.theme.BeerBasementTheme
 
 class MainActivity : ComponentActivity() {
@@ -145,14 +146,21 @@ fun MainScreen(takePictureLauncher: ActivityResultLauncher<Intent>, modifier: Mo
         composable(NavRoutes.BeerAdd.route) {
             BeerAdd(
                 modifier = modifier,
-                takePictureLauncher = takePictureLauncher,
                 onNavigateBack = { navController.popBackStack() },
                 addBeer = { beer -> viewModel.addBeer(beer) },
                 signOut = {
                     authenticationViewModel.signOut()
                     viewModel.clearBeers() // Clear beers on sign out
-                }
+                },
+                navController = navController
             )
+        }
+        composable(
+            NavRoutes.ImageDataScreen.route + "/{imageUri}",
+            arguments = listOf(navArgument("imageUri") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val imageUri = backStackEntry.arguments?.getString("imageUri")
+            ImageDataScreen(imageUri = imageUri)
         }
     }
 }
