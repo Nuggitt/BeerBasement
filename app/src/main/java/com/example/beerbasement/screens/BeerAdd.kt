@@ -72,7 +72,7 @@ fun BeerAdd(
     val context = LocalContext.current
 
     // Request camera permissions
-    LaunchedEffect(Unit) {
+    LaunchedEffect(context) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
             != PackageManager.PERMISSION_GRANTED
         ) {

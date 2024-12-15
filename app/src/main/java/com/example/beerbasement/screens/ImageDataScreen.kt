@@ -2,6 +2,7 @@ package com.example.beerbasement.screens
 
 import android.net.Uri
 import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.provider.MediaStore
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
@@ -34,8 +37,18 @@ fun ImageDataScreen(imageUri: String?, modifier: Modifier = Modifier) {
     val uri = Uri.parse(imageUri)
     val painter: Painter = rememberAsyncImagePainter(model = uri)
 
-    // Load and preprocess image when the URI is passed
-    androidx.compose.runtime.LaunchedEffect(imageUri) {
+    // Load the TensorFlow Lite model and preprocess the image
+    LaunchedEffect(Unit) {
+        tensorFlowModel.loadModel(context)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            tensorFlowModel.close()
+        }
+    }
+
+    LaunchedEffect(imageUri) {
         if (imageUri != null) {
             try {
                 val bitmap = preprocessImage(uri, context)
@@ -46,6 +59,8 @@ fun ImageDataScreen(imageUri: String?, modifier: Modifier = Modifier) {
                 prediction.value = result
             } catch (e: IOException) {
                 prediction.value = "Error loading image"
+            } catch (e: Exception) {
+                prediction.value = "Error during prediction"
             }
         }
     }
@@ -82,8 +97,14 @@ fun ImageDataScreen(imageUri: String?, modifier: Modifier = Modifier) {
 
 fun preprocessImage(imageUri: Uri, context: android.content.Context): Bitmap {
     val contentResolver = context.contentResolver
-    val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, imageUri)
+    val bitmap = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+        val source = ImageDecoder.createSource(contentResolver, imageUri)
+        ImageDecoder.decodeBitmap(source)
+    } else {
+        MediaStore.Images.Media.getBitmap(contentResolver, imageUri)
+    }
+    val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 224, 224, true)
 
-    // Resize the image to the expected size for the model (e.g., 224x224)
-    return Bitmap.createScaledBitmap(bitmap, 224, 224, true)
+    // Normalize the image for TensorFlow if required
+    return resizedBitmap
 }

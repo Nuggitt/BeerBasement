@@ -1,6 +1,8 @@
 package com.example.beerbasement
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.widget.Toast
@@ -14,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -31,12 +34,19 @@ import com.example.beerbasement.screens.ImageDataScreen
 import com.example.beerbasement.ui.theme.BeerBasementTheme
 
 class MainActivity : ComponentActivity() {
+
+    companion object {
+        const val PERMISSION_REQUEST_CODE = 101
+    }
+
     private lateinit var takePictureLauncher: ActivityResultLauncher<Intent>
+    private lateinit var requestPermissionsLauncher: ActivityResultLauncher<Array<String>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // Register the activity result launcher for taking a picture
         takePictureLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 val imageBitmap = result.data?.extras?.get("data") as Bitmap?
@@ -48,16 +58,48 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        // Register the activity result launcher for requesting permissions
+        requestPermissionsLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (permissions.all { it.value }) {
+                // Permissions granted, proceed with the functionality
+            } else {
+                Toast.makeText(this, "Permissions are required to use this feature.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Check and request permissions when the activity is created
+        checkAndRequestPermissions()
+
         setContent {
             BeerBasementTheme {
-                MainScreen(takePictureLauncher)
+                MainScreen()
             }
+        }
+    }
+
+    // Function to check and request permissions
+    private fun checkAndRequestPermissions() {
+        val permissionsNeeded = mutableListOf<String>()
+
+        // Check if permission for Camera is granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            permissionsNeeded.add(Manifest.permission.CAMERA)
+        }
+
+        // Check if permission for Write External Storage is granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            permissionsNeeded.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+
+        // If any of the required permissions are not granted, request them
+        if (permissionsNeeded.isNotEmpty()) {
+            requestPermissionsLauncher.launch(permissionsNeeded.toTypedArray())
         }
     }
 }
 
 @Composable
-fun MainScreen(takePictureLauncher: ActivityResultLauncher<Intent>, modifier: Modifier = Modifier) {
+fun MainScreen(modifier: Modifier = Modifier) {
     val viewModel: BeersViewModelState = viewModel()
     val navController = rememberNavController()
     val authenticationViewModel: AuthenticationViewModel = viewModel()
@@ -72,9 +114,7 @@ fun MainScreen(takePictureLauncher: ActivityResultLauncher<Intent>, modifier: Mo
                 modifier = modifier,
                 user = authenticationViewModel.user,
                 message = authenticationViewModel.message,
-                signIn = { email, password ->
-                    authenticationViewModel.signIn(email, password)
-                },
+                signIn = { email, password -> authenticationViewModel.signIn(email, password) },
                 register = { email, password -> authenticationViewModel.register(email, password) },
                 navigateToNextScreen = { navController.navigate(NavRoutes.BeerList.route) }
             )
@@ -135,10 +175,7 @@ fun MainScreen(takePictureLauncher: ActivityResultLauncher<Intent>, modifier: Mo
                     viewModel.clearBeers() // Clear beers on sign out
                 },
                 onUpdate = { beerid: Int, updatedBeer: Beer ->
-                    viewModel.updateBeer(
-                        beerid,
-                        updatedBeer
-                    )
+                    viewModel.updateBeer(beerid, updatedBeer)
                 },
                 navigateToUrlSite = { url -> viewModel.navigateToUrlSite(context, url) }
             )

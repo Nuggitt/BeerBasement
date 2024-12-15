@@ -38,21 +38,20 @@ class TensorFlowModel {
 
     // Run inference with Bitmap and return the predicted beer style
     fun predictBeerStyle(bitmap: Bitmap): String {
-        // Convert the bitmap into a ByteBuffer
-        val byteBuffer = convertBitmapToByteBuffer(bitmap)
+        return try {
+            val byteBuffer = convertBitmapToByteBuffer(bitmap)
+            val output = Array(1) { FloatArray(4) } // Adjust based on your model's output
+            tflite?.run(byteBuffer, output)
 
-        // Run inference
-        val output = Array(1) { FloatArray(4) } // Assuming 4 classes in the model output (e.g., Pilsner, IPA, Lager, Stout)
-        tflite?.run(byteBuffer, output)
+            val predictedClass = output[0].indices.maxByOrNull { output[0][it] } ?: -1
+            val beerStyles = arrayOf("Pilsner", "IPA", "Lager", "Stout")
 
-        // Find the class with the highest probability (argmax)
-        val predictedClass = output[0].indices.maxByOrNull { output[0][it] } ?: -1
-
-        // Define the beer styles in the order the model was trained
-        val beerStyles = arrayOf("Pilsner", "IPA", "Lager", "Stout")
-
-        return if (predictedClass != -1) beerStyles[predictedClass] else "Unknown"
+            if (predictedClass != -1) beerStyles[predictedClass] else "Unknown"
+        } catch (e: Exception) {
+            "Error predicting beer style"
+        }
     }
+
 
     // Convert Bitmap to ByteBuffer
     private fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
