@@ -39,9 +39,6 @@ class BeersRepository() {
         getBeers()
     }
 
-    fun getBeerStylePrediction(inputData: Bitmap): String {
-        return tensorFlowModel.predictBeerStyle(inputData)
-    }
 
     fun getBeers() {
         isLoadingBeers.value = true

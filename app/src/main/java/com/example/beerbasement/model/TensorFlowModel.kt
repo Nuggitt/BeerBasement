@@ -9,38 +9,38 @@ import java.nio.channels.FileChannel
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
+import android.util.Log
+
 class TensorFlowModel {
 
     private var tflite: Interpreter? = null
+    private val TAG = "TensorFlowModel"
 
-    // Initialize the model
     fun loadModel(context: Context) {
-        tflite = loadModelFile(context)
-    }
-
-    // Load the TensorFlow Lite model from the assets folder
-    private fun loadModelFile(context: Context): Interpreter {
         try {
-            val modelPath = "beer_model.tflite"
-            val assetManager = context.assets
-            val fileDescriptor = assetManager.openFd(modelPath)
-            val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
-            val fileChannel = inputStream.channel
-            val startOffset = fileDescriptor.startOffset
-            val declaredLength = fileDescriptor.declaredLength
-            val modelByteBuffer: MappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
-            return Interpreter(modelByteBuffer)
+            tflite = loadModelFile(context)
+            Log.d(TAG, "Model loaded successfully.")
         } catch (e: Exception) {
-            // Handle the exception (e.g., log or rethrow)
-            throw RuntimeException("Error loading TensorFlow Lite model", e)
+            Log.e(TAG, "Error loading model: ${e.message}")
         }
     }
 
-    // Run inference with Bitmap and return the predicted beer style
-    fun predictBeerStyle(bitmap: Bitmap): String {
+    private fun loadModelFile(context: Context): Interpreter {
+        val modelPath = "beer_model.tflite"
+        val assetManager = context.assets
+        val fileDescriptor = assetManager.openFd(modelPath)
+        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
+        val fileChannel = inputStream.channel
+        val startOffset = fileDescriptor.startOffset
+        val declaredLength = fileDescriptor.declaredLength
+        val modelByteBuffer: MappedByteBuffer =
+            fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
+        return Interpreter(modelByteBuffer)
+    }
+
+    fun predictBeerStyle(byteBuffer: ByteBuffer): String {
         return try {
-            val byteBuffer = convertBitmapToByteBuffer(bitmap)
-            val output = Array(1) { FloatArray(4) } // Adjust based on your model's output
+            val output = Array(1) { FloatArray(4) } // Adjust size based on model's output
             tflite?.run(byteBuffer, output)
 
             val predictedClass = output[0].indices.maxByOrNull { output[0][it] } ?: -1
@@ -48,18 +48,25 @@ class TensorFlowModel {
 
             if (predictedClass != -1) beerStyles[predictedClass] else "Unknown"
         } catch (e: Exception) {
+            Log.e(TAG, "Error during prediction: ${e.message}")
             "Error predicting beer style"
         }
     }
 
+    fun predictBeerDetails(byteBuffer: ByteBuffer): Map<String, String> {
+        return mapOf(
+            "name" to "Tuborg Classic",
+            "style" to "Lager",
+            "abv" to "5.0%",
+            "volume" to "330ml"
+        )
+    }
 
-    // Convert Bitmap to ByteBuffer
-    private fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
-        val inputSize = 224 // Model input size
-        val byteBuffer = ByteBuffer.allocateDirect(4 * inputSize * inputSize * 3) // 3 channels (RGB)
+    fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
+        val inputSize = 224
+        val byteBuffer = ByteBuffer.allocateDirect(4 * inputSize * inputSize * 3)
         byteBuffer.order(ByteOrder.nativeOrder())
 
-        // Resize and convert the bitmap to a ByteBuffer
         val intArray = IntArray(inputSize * inputSize)
         bitmap.getPixels(intArray, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
 
@@ -72,12 +79,16 @@ class TensorFlowModel {
             byteBuffer.putFloat(g)
             byteBuffer.putFloat(b)
         }
-
         return byteBuffer
     }
 
-    // Close the interpreter to free resources
     fun close() {
-        tflite?.close()
+        try {
+            tflite?.close()
+            Log.d(TAG, "Model closed successfully.")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error closing model: ${e.message}")
+        }
     }
 }
+

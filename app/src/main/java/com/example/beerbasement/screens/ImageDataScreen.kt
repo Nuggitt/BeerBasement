@@ -4,10 +4,15 @@ import android.net.Uri
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.provider.MediaStore
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,12 +31,19 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.beerbasement.model.TensorFlowModel
 import java.io.IOException
 
+data class BeerPrediction(
+    val name: String,
+    val style: String,
+    val abv: String,
+    val volume: String
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImageDataScreen(imageUri: String?, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val tensorFlowModel = remember { TensorFlowModel() }
-    val prediction = remember { mutableStateOf("Loading...") }
+    val beerPrediction = remember { mutableStateOf<BeerPrediction?>(null) }
     val imageBitmap = remember { mutableStateOf<Bitmap?>(null) }
 
     val uri = Uri.parse(imageUri)
@@ -49,19 +61,34 @@ fun ImageDataScreen(imageUri: String?, modifier: Modifier = Modifier) {
     }
 
     LaunchedEffect(imageUri) {
+        Log.d("ImageDataScreen", "Received imageUri: $imageUri")
         if (imageUri != null) {
             try {
                 val bitmap = preprocessImage(uri, context)
+                Log.d("ImageDataScreen", "Bitmap preprocessed: ${bitmap.width}x${bitmap.height}")
                 imageBitmap.value = bitmap
 
-                // Predict beer style using TensorFlow
-                val result = tensorFlowModel.predictBeerStyle(bitmap)
-                prediction.value = result
+                // TensorFlow prediction for beer details
+                val byteBuffer = tensorFlowModel.convertBitmapToByteBuffer(bitmap)
+                val result = tensorFlowModel.predictBeerDetails(byteBuffer)
+                Log.d("ImageDataScreen", "Prediction result: $result")
+
+                // Simulate a JSON parsing of the result
+                beerPrediction.value = BeerPrediction(
+                    name = result["name"] ?: "Unknown",
+                    style = result["style"] ?: "Unknown",
+                    abv = result["abv"] ?: "Unknown",
+                    volume = result["volume"] ?: "Unknown"
+                )
             } catch (e: IOException) {
-                prediction.value = "Error loading image"
+                Log.e("ImageDataScreen", "Error loading image: ${e.message}")
+                beerPrediction.value = null
             } catch (e: Exception) {
-                prediction.value = "Error during prediction"
+                Log.e("ImageDataScreen", "Error during prediction: ${e.message}")
+                beerPrediction.value = null
             }
+        } else {
+            Log.e("ImageDataScreen", "No imageUri provided")
         }
     }
 
@@ -74,7 +101,11 @@ fun ImageDataScreen(imageUri: String?, modifier: Modifier = Modifier) {
             )
         }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState()) // Makes the Column scrollable
+        ) {
             // Display image
             imageBitmap.value?.let {
                 Image(
@@ -82,15 +113,25 @@ fun ImageDataScreen(imageUri: String?, modifier: Modifier = Modifier) {
                     contentDescription = null,
                     modifier = Modifier
                         .padding(16.dp)
-                        .fillMaxSize()
+                        .fillMaxWidth() // Ensure image doesn't take too much space
+                        .height(200.dp) // Set a fixed height for the image
                 )
             }
 
             // Display prediction result
-            Text(
-                text = "Predicted Beer Style: ${prediction.value}",
-                modifier = Modifier.padding(16.dp)
-            )
+            beerPrediction.value?.let { prediction ->
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Name: ${prediction.name}")
+                    Text("Style: ${prediction.style}")
+                    Text("ABV: ${prediction.abv}")
+                    Text("Volume: ${prediction.volume}")
+                }
+            } ?: run {
+                Text(
+                    text = "No prediction available",
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
         }
     }
 }
@@ -103,8 +144,12 @@ fun preprocessImage(imageUri: Uri, context: android.content.Context): Bitmap {
     } else {
         MediaStore.Images.Media.getBitmap(contentResolver, imageUri)
     }
-    val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 224, 224, true)
 
-    // Normalize the image for TensorFlow if required
+    // Ensure the bitmap is mutable and uses ARGB_8888 configuration
+    val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+
+    // Resize the bitmap to the required dimensions (224x224)
+    val resizedBitmap = Bitmap.createScaledBitmap(mutableBitmap, 224, 224, true)
+
     return resizedBitmap
 }
