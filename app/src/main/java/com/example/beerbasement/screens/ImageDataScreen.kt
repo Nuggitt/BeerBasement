@@ -73,7 +73,7 @@ fun ImageDataScreen(imageUri: String?, modifier: Modifier = Modifier) {
                 val result = tensorFlowModel.predictBeerDetails(byteBuffer)
                 Log.d("ImageDataScreen", "Prediction result: $result")
 
-                // Simulate a JSON parsing of the result
+                // Update UI with prediction result
                 beerPrediction.value = BeerPrediction(
                     name = result["name"] ?: "Unknown",
                     style = result["style"] ?: "Unknown",

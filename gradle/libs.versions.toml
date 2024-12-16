@@ -23,6 +23,7 @@ composeMaterial = "1.4.0"
 runtimeLivedata = "1.7.6"
 tensorflowLite = "2.16.1"
 tensorflowLiteSupport = "0.4.4"
+tensorflowLiteTaskVision = "2.13.0"
 uiTestJunit4 = "1.7.6"
 uiTestManifest = "1.7.6"
 
@@ -57,6 +58,7 @@ mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockito
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "converterGson" }
 tensorflow-lite = { module = "org.tensorflow:tensorflow-lite", version.ref = "tensorflowLite" }
 tensorflow-lite-support = { module = "org.tensorflow:tensorflow-lite-support", version.ref = "tensorflowLiteSupport" }
+tensorflow-lite-task-vision = { module = "org.tensorflow:tensorflow-lite-task-vision", version.ref = "tensorflowLiteTaskVision" }
 ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "uiTestJunit4" }
 ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "uiTestManifest" }
 
