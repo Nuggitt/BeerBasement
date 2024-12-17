@@ -16,7 +16,6 @@ class TensorFlowModel(private val modelPath: String = "beer_model.tflite") {
     // Load the model from assets into the interpreter
     fun loadModel(context: Context) {
         try {
-            // Load the model file from assets
             val assetManager = context.assets
             val fileDescriptor = assetManager.openFd(modelPath)
             val fileInputStream = FileInputStream(fileDescriptor.fileDescriptor)
@@ -26,6 +25,14 @@ class TensorFlowModel(private val modelPath: String = "beer_model.tflite") {
             // Initialize the TensorFlow Lite Interpreter
             interpreter = Interpreter(modelByteBuffer)
             Log.d("TensorFlowModel", "Model loaded successfully.")
+
+            // Checking output tensor shapes (for debugging)
+            val outputTensorName = interpreter?.getOutputTensor(0)
+            val outputTensorStyle = interpreter?.getOutputTensor(1)
+            Log.d("TensorFlowModel", "Output tensor name shape: ${outputTensorName?.shape()?.contentToString()}")
+            Log.d("TensorFlowModel", "Output tensor style shape: ${outputTensorStyle?.shape()?.contentToString()}")
+            Log.d("TensorFlowModel", "Output tensor abv shape: ${interpreter?.getOutputTensor(2)?.shape()?.contentToString()}")
+            Log.d("TensorFlowModel", "Output tensor volume shape: ${interpreter?.getOutputTensor(3)?.shape()?.contentToString()}")
         } catch (e: IOException) {
             Log.e("TensorFlowModel", "Error loading model: ${e.message}")
         }
@@ -52,86 +59,88 @@ class TensorFlowModel(private val modelPath: String = "beer_model.tflite") {
         val intArray = IntArray(inputSize * inputSize)
         resizedBitmap.getPixels(intArray, 0, resizedBitmap.width, 0, 0, resizedBitmap.width, resizedBitmap.height)
 
-        // Process each pixel and add normalized RGB values to the ByteBuffer
         for (pixel in intArray) {
             val r = ((pixel shr 16) and 0xFF) / 255.0f
             val g = ((pixel shr 8) and 0xFF) / 255.0f
             val b = (pixel and 0xFF) / 255.0f
-            byteBuffer.putFloat(r)  // Red channel
-            byteBuffer.putFloat(g)  // Green channel
-            byteBuffer.putFloat(b)  // Blue channel
+            byteBuffer.putFloat(r)
+            byteBuffer.putFloat(g)
+            byteBuffer.putFloat(b)
         }
 
-        // Rewind the buffer to the beginning for further processing
         byteBuffer.rewind()
-
         return byteBuffer
     }
 
-    // Predict beer details from the ByteBuffer input (e.g., beer name, style, etc.)
-    fun predictBeerDetails(byteBuffer: ByteBuffer): Map<String, String> {
-        val output = Array(1) { FloatArray(6) }  // Ensure this is the correct output size for 6 classes
+    // Predict beer details from the ByteBuffer input
+    fun predictBeerDetails(byteBuffer: ByteBuffer): Map<String, Any> {
+        // Updated to handle a single value output per category (or adjust if the model outputs more than one value per category)
+        val outputName = Array(1) { FloatArray(6) }  // Adjust based on your model's output dimensions
+        val outputStyle = Array(1) { FloatArray(1) }
+        val outputABV = Array(1) { FloatArray(6) }
+        val outputVolume = Array(1) { FloatArray(1) }
 
-        // Run the model with the byteBuffer input
-        interpreter?.run(byteBuffer, output)
+        interpreter?.runForMultipleInputsOutputs(
+            arrayOf(byteBuffer),
+            mapOf(0 to outputName, 1 to outputStyle, 2 to outputABV, 3 to outputVolume)
+        )
 
-        // Log the raw output for debugging
-        Log.d("TensorFlowModel", "Raw output: ${output[0].joinToString(", ")}")
+        // Get human-readable results
+        val predictedName = mapName(outputName[0])
+        val predictedStyle = mapStyle(outputStyle[0])
+        val predictedABV = mapABV(outputABV[0])  // Convert ABV to string
+        val predictedVolume = mapVolume(outputVolume[0])  // Convert volume to string
 
         return mapOf(
-            "name" to mapName(output[0]),
-            "style" to mapStyle(output[0]),
-            "abv" to mapABV(output[0].getOrNull(2) ?: -1.0f),  // Check index before accessing
-            "volume" to mapVolume(output[0].getOrNull(3) ?: -1.0f)  // Check index before accessing
+            "name" to predictedName,
+            "style" to predictedStyle,
+            "abv" to predictedABV,
+            "volume" to predictedVolume
         )
     }
 
-
     // Example of how to map model output to human-readable values
     private fun mapStyle(output: FloatArray): String {
-        val index = output.indices.maxByOrNull { output[it] } ?: -1
-        return when (index) {
-            0 -> "Lager"
+        val styleIndex = output[0].toInt()  // The style output is a scalar index
+        return when (styleIndex) {
+            0 -> "Dark Lager"
             1 -> "Pilsner"
-            2 -> "Stout"
-            3 -> "IPA"
-            4 -> "Ale"
+            2 -> "Lager"
+            3 -> "Stout"
+            4 -> "Pale Lager"
+            5 -> "Light Lager"
             else -> "Unknown"
         }
     }
 
-    private fun mapABV(output: Float): String {
-        return "${output.toInt()}%"  // Assuming ABV is at index 3
+
+    private fun mapABV(output: FloatArray): String {
+        // Assuming the model outputs values between 0 and 1, scale to percentage
+        val abv = output[0] * 100  // Scale from [0,1] to [0,100] for percentage
+        // Clamp the value to avoid unreasonably high values
+        val clampedABV = abv.coerceIn(0f, 100f)
+        return "${clampedABV}%"
     }
 
-    private fun mapVolume(output: Float): String {
-        return "${output.toInt()} ml"  // Assuming volume is at index 4
+    private fun mapVolume(output: FloatArray): String {
+        val volume = output[0] * 1000 // Scale the predicted volume to milliliters, assuming it’s a fraction of 1000 ml
+        return "$volume ml"
     }
+
+
 
     private fun mapName(output: FloatArray): String {
         val index = output.indices.maxByOrNull { output[it] } ?: -1
-
-        // Log the raw output to see the model's prediction confidence
-        Log.d("TensorFlowModel", "Raw output: ${output.joinToString(", ")}")
-
-        // Set a confidence threshold to avoid incorrect classifications
-        val threshold = 0.5f  // Example threshold for confidence
-
-        if (output[index] >= threshold) {
-            return when (index) {
-                0 -> "Budweiser"
-                1 -> "Carlsberg Pilsner"
-                2 -> "Corona"
-                3 -> "Guinness"
-                4 -> "Heineken"
-                5 -> "Tuborg Classic"
-                else -> "Unknown"
-            }
-        } else {
-            return "Unknown" // If the model isn't confident enough, return "Unknown"
+        return when (index) {
+            0 -> "Budweiser"
+            1 -> "Carlsberg"
+            2 -> "Corona Extra"
+            3 -> "Guinness Foreign Extra Stout"
+            4 -> "Heineken"
+            5 -> "Tuborg Classic"
+            else -> "Unknown"
         }
     }
-
-
-
 }
+
+

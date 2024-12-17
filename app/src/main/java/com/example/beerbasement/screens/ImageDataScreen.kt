@@ -75,10 +75,10 @@ fun ImageDataScreen(imageUri: String?, modifier: Modifier = Modifier) {
 
                 // Update UI with prediction result
                 beerPrediction.value = BeerPrediction(
-                    name = result["name"] ?: "Unknown",
-                    style = result["style"] ?: "Unknown",
-                    abv = result["abv"] ?: "Unknown",
-                    volume = result["volume"] ?: "Unknown"
+                    name = result["name"] as? String ?: "Unknown",  // Safely cast or use default "Unknown"
+                    style = result["style"] as? String ?: "Unknown",
+                    abv = result["abv"]?.toString() ?: "Unknown",  // Use .toString() for non-String values
+                    volume = result["volume"]?.toString() ?: "Unknown"
                 )
             } catch (e: IOException) {
                 Log.e("ImageDataScreen", "Error loading image: ${e.message}")
@@ -142,6 +142,7 @@ fun preprocessImage(imageUri: Uri, context: android.content.Context): Bitmap {
         val source = ImageDecoder.createSource(contentResolver, imageUri)
         ImageDecoder.decodeBitmap(source)
     } else {
+        @Suppress("DEPRECATION")
         MediaStore.Images.Media.getBitmap(contentResolver, imageUri)
     }
 
