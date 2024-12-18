@@ -74,8 +74,8 @@ class TensorFlowModel(private val modelPath: String = "beer_model.tflite") {
 
     // Predict beer details from the ByteBuffer input
     fun predictBeerDetails(byteBuffer: ByteBuffer): Map<String, Any> {
-        // Updated to handle a single value output per category (or adjust if the model outputs more than one value per category)
-        val outputName = Array(1) { FloatArray(6) }  // Adjust based on your model's output dimensions
+
+        val outputName = Array(1) { FloatArray(6) }
         val outputStyle = Array(1) { FloatArray(1) }
         val outputABV = Array(1) { FloatArray(6) }
         val outputVolume = Array(1) { FloatArray(1) }
