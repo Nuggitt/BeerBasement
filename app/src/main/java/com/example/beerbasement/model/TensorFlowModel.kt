@@ -13,6 +13,7 @@ import java.io.IOException
 class TensorFlowModel(private val modelPath: String = "beer_model.tflite") {
     private var interpreter: Interpreter? = null
 
+
     // Load the model from assets into the interpreter
     fun loadModel(context: Context) {
         try {
